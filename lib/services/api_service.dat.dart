@@ -1,7 +1,8 @@
-import 'dart:developer'; // Pour log
+import 'dart:async';
 import 'package:dio/dio.dart';
 
 import 'package:projet_esgix/models/auth_user_model.dart';
+import 'package:projet_esgix/models/user_model.dart';
 
 class ApiService {
   static ApiService? _instance;
@@ -40,15 +41,20 @@ class ApiService {
     AuthUser.fromJson(response.data);
   }
 
-  Future<void> register(String email, String password, String username, String avatar) async {
+  Future<void> register(String email, String password, String username, [String? avatar]) async {
+    final data = {
+      'email': email,
+      'password': password,
+      'username': username,
+    };
+
+    if (avatar != null) {
+      data['avatar'] = avatar;
+    }
+
     final response = await _httpClient.post(
       '/auth/register',
-      data: {
-        'email': email,
-        'password': password,
-        'username': username,
-        'avatar': avatar
-      },
+      data: data,
     );
     if (response.statusCode == 200) {
       return;
@@ -59,5 +65,20 @@ class ApiService {
     } else {
       throw Exception('Failed to register: ${response.data}');
     }
+  }
+
+  Future<User> getUserById(String id) async {
+    final response = await _httpClient.get(
+        '/users/$id',
+      options: Options(headers: {
+        'Authorization' : AuthUser.bearerTokenHeaderValue,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to fetch userById: ${response.data}');
+    }
+
+    return User.fromJson(response.data);
   }
 }

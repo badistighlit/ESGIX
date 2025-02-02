@@ -1,4 +1,3 @@
-import 'package:projet_esgix/models/auth_user_model.dart';
 import '../services/api_service.dat.dart';
 
 abstract class AuthRepository {

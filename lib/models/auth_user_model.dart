@@ -39,6 +39,7 @@ class AuthUser {
   }
 
   static String? get bearerToken => _instance?._bearerToken;
+  static String? get bearerTokenHeaderValue => "Bearer ${_instance!._bearerToken}";
   static String? get id => _instance?._id;
   static String? get username => _instance?._username;
   static String? get email => _instance?._email;
