@@ -69,7 +69,7 @@ class ApiService {
       throw Exception('Get user error: ${e.toString()}');
     }
   }
-
+//posts
   Future<List<Map<String, dynamic>>> fetchPosts({int page = 0, int offset = 100}) async {
     try {
       final response = await _httpClient.get(
@@ -82,6 +82,41 @@ class ApiService {
         return List<Map<String, dynamic>>.from(response.data['data']);
       }
       throw Exception('Failed to load posts: ${response.statusCode}');
+    } catch (e) {
+      throw Exception('Fetch posts error: ${e.toString()}');
+    }
+  }
+
+  Future<Map<String, dynamic>> fetchPostById(String idpost) async {
+    try {
+      final response = await _httpClient.get(
+        '/posts/$idpost',
+        options: Options(headers: _getHeaders()),
+      );
+
+      if (response.statusCode == 200) {
+        return Map<String, dynamic>.from(response.data['data']);
+      }
+      throw Exception('Failed to load post: ${response.statusCode}');
+    } catch (e) {
+      throw Exception('Fetch post error: ${e.toString()}');
+    }
+  }
+
+
+  //comments
+  Future<List<Map<String, dynamic>>> fetchComments(String idParent) async {
+    try {
+      final response = await _httpClient.get(
+        '/posts',
+        queryParameters: {'parent': idParent},
+        options: Options(headers: _getHeaders()),
+      );
+
+      if (response.statusCode == 200) {
+        return List<Map<String, dynamic>>.from(response.data['data']);
+      }
+      throw Exception('Failed to load comments: ${response.statusCode}');
     } catch (e) {
       throw Exception('Fetch posts error: ${e.toString()}');
     }
