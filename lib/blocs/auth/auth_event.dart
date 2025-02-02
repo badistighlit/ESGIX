@@ -14,7 +14,11 @@ class Login extends AuthEvent {
   @override
   List<Object> get props => [email, password];
 }
+class AppStarted extends AuthEvent {}
 
+class LoggedIn extends AuthEvent {}
+
+class LoggedOut extends AuthEvent {}
 
 class Register extends AuthEvent {
   final String email;

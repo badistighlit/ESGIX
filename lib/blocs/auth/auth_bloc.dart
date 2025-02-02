@@ -10,6 +10,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc(this.authRepository) : super(AuthInitial()) {
     on<Login>(_onLogin);
     on<Register>(_onRegister);
+    on<AppStarted>(_onAppStarted);
+    on<LoggedOut>(_onLoggedOut);
   }
 
   void _onLogin(Login event, Emitter<AuthState> emit) async {
@@ -31,8 +33,33 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       final register = await authRepository.register(event.email, event.password, event.username, event.avatar);
       emit(AuthSuccess(register.username));
-        } catch (e) {
+    } catch (e) {
       emit(RegisterFailure(e.toString()));
     }
   }
+  void _onAppStarted(AppStarted event, Emitter<AuthState> emit) async {
+    emit(AuthLoading());
+    try {
+      // Vérifier si l'utilisateur a un token valide
+      final currentUser = await authRepository.getCurrentUser();
+      if (currentUser != null) {
+        emit(AuthSuccess(currentUser.username));
+      } else {
+        emit(const AuthInitial());
+      }
+    } catch (e) {
+      emit(const AuthInitial());
+    }
+  }
+  void _onLoggedOut(LoggedOut event, Emitter<AuthState> emit) async {
+    emit(AuthLoading());
+    try {
+      await authRepository.logout();
+      emit(const AuthInitial());
+    } catch (e) {
+      emit(AuthFailure(e.toString()));
+    }
+  }
+
+
 }
