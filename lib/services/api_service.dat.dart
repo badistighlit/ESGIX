@@ -1,57 +1,84 @@
-import 'dart:convert';
-import 'dart:developer'; // Pour log
+import 'dart:async';
+import 'package:dio/dio.dart';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart' as http;
+import 'package:projet_esgix/models/auth_user_model.dart';
 import 'package:projet_esgix/models/user_model.dart';
 
 class ApiService {
+  static ApiService? _instance;
   final String baseUrl;
-  final http.Client httpClient;
+  Map<String, String> defaultHeaders;
+  late final Dio _httpClient;
 
-  ApiService({required this.baseUrl, required this.httpClient});
+  ApiService._({required this.baseUrl, this.defaultHeaders = const {}})
+  {
+    _httpClient = Dio(BaseOptions(
+      baseUrl: baseUrl,
+      headers: defaultHeaders,
+    ));
+  }
 
-  Future<User> login(String email, String password) async {
-    String apiKey = dotenv.get('API_KEY');
-    Map<String, String> headers = {
-      'x-api-key': apiKey,
-      'Content-Type': 'application/json'
-    };
-    String body = jsonEncode({'email': email, 'password': password});
+  factory ApiService({required baseUrl, defaultHeaders = const {}})
+  {
+    _instance ??= ApiService._(baseUrl: baseUrl, defaultHeaders: defaultHeaders);
 
-    final response = await httpClient.post(
-      Uri.parse('$baseUrl/auth/login'),
-      headers: headers,
-      body: body,
+    return _instance!;
+  }
+
+  Future<void> login(String email, String password) async {
+    final response = await _httpClient.post(
+      '/auth/login',
+      data: {
+        'email': email,
+        'password': password
+      },
     );
 
+    if (response.statusCode != 200) {
+      throw Exception('Failed to login: ${response.data}');
+    }
+
+    AuthUser.fromJson(response.data);
+  }
+
+  Future<void> register(String email, String password, String username, [String? avatar]) async {
+    final data = {
+      'email': email,
+      'password': password,
+      'username': username,
+    };
+
+    if (avatar != null) {
+      data['avatar'] = avatar;
+    }
+
+    final response = await _httpClient.post(
+      '/auth/register',
+      data: data,
+    );
     if (response.statusCode == 200) {
-      return User.fromJson(json.decode(response.body));
+      return;
+    }
+
+    if (response.statusCode == 400) {
+      throw Exception(response.data['message'] ?? 'Unknown error occurred');
     } else {
-      throw Exception('Failed to login: ${response.body}');
+      throw Exception('Failed to register: ${response.data}');
     }
   }
 
-  Future<Register> register(String email, String password, String username, String avatar) async {
-    String apiKey = dotenv.get('API_KEY');
-    Map<String, String> headers = {
-      'x-api-key': apiKey,
-      'Content-Type': 'application/json'
-    };
-    String body = jsonEncode({'email': email, 'password': password, 'username': username, 'avatar': avatar});
-
-    final response = await httpClient.post(
-      Uri.parse('$baseUrl/auth/register'),
-      headers: headers,
-      body: body,
+  Future<User> getUserById(String id) async {
+    final response = await _httpClient.get(
+        '/users/$id',
+      options: Options(headers: {
+        'Authorization' : AuthUser.bearerTokenHeaderValue,
+      }),
     );
-    if (response.statusCode == 200) {
-      return Register.fromJson(json.decode(response.body));
-    } else if (response.statusCode == 400) {
-      var errorMessage = json.decode(response.body)['message'] ?? 'Unknown error occurred';
-      throw Exception(errorMessage);
-    } else {
-      throw Exception('Failed to register: ${response.body}');
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to fetch userById: ${response.data}');
     }
+
+    return User.fromJson(response.data);
   }
 }
