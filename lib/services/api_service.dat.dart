@@ -1,102 +1,100 @@
-import 'dart:convert';
-import 'dart:developer'; // Pour log
-
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart' as http;
+import 'dart:async';
+import 'package:dio/dio.dart';
+import 'package:projet_esgix/models/auth_user_model.dart';
 import 'package:projet_esgix/models/user_model.dart';
 
-import '../models/post_model.dart';
 class ApiService {
+  static ApiService? _instance;
   final String baseUrl;
-  final http.Client httpClient;
-  String? _token;
-  String apiKey = dotenv.get('API_KEY');
+  Map<String, String> defaultHeaders;
+  late final Dio _httpClient;
 
-  ApiService({required this.baseUrl, required this.httpClient});
-
-  void setToken(String token) {
-    _token = token;
+  ApiService._({required this.baseUrl, this.defaultHeaders = const {}}) {
+    _httpClient = Dio(BaseOptions(
+      baseUrl: baseUrl,
+      headers: defaultHeaders,
+    ));
   }
 
-  Future<Register> register(String email, String password, String username, String avatar) async {
-    String apiKey = dotenv.get('API_KEY');
-    Map<String, String> headers = {
-      'x-api-key': apiKey,
-      'Content-Type': 'application/json'
-    };
-    String body = jsonEncode({'email': email, 'password': password, 'username': username, 'avatar': avatar});
+  factory ApiService({required String baseUrl, Map<String, String> defaultHeaders = const {}}) {
+    _instance ??= ApiService._(baseUrl: baseUrl, defaultHeaders: defaultHeaders);
+    return _instance!;
+  }
 
-    final response = await httpClient.post(
-      Uri.parse('$baseUrl/auth/register'),
-      headers: headers,
-      body: body,
-    );
-    if (response.statusCode == 200) {
-      return Register.fromJson(json.decode(response.body));
-    } else if (response.statusCode == 400) {
-      var errorMessage = json.decode(response.body)['message'] ?? 'Unknown error occurred';
-      throw Exception(errorMessage);
-    } else {
-      throw Exception('Failed to register: ${response.body}');
+  Future<AuthUser> login(String email, String password) async {
+    try {
+      final response = await _httpClient.post(
+        '/auth/login',
+        data: {'email': email, 'password': password},
+      );
+
+      if (response.statusCode == 200) {
+        return AuthUser.fromJson(response.data);
+      }
+      throw Exception('Failed to login: ${response.data}');
+    } catch (e) {
+      throw Exception('Login error: ${e.toString()}');
     }
   }
 
-  Future<User> login(String email, String password) async {
-    String apiKey = dotenv.get('API_KEY');
-    Map<String, String> headers = {
-      'x-api-key': apiKey,
-      'Content-Type': 'application/json'
-    };
-    String body = jsonEncode({'email': email, 'password': password});
+  Future<void> register(String email, String password, String username, [String? avatar]) async {
+    try {
+      final data = {'email': email, 'password': password, 'username': username};
+      if (avatar != null) {
+        data['avatar'] = avatar;
+      }
 
-    final response = await httpClient.post(
-      Uri.parse('$baseUrl/auth/login'),
-      headers: headers,
-      body: body,
-    );
+      final response = await _httpClient.post('/auth/register', data: data);
 
-    if (response.statusCode == 200) {
-      return User.fromJson(json.decode(response.body));
-    } else {
-      throw Exception('Failed to login: ${response.body}');
+      if (response.statusCode != 200) {
+        throw Exception(response.data['message'] ?? 'Unknown error occurred');
+      }
+    } catch (e) {
+      throw Exception('Registration error: ${e.toString()}');
+    }
+  }
+
+  Future<User> getUserById(String id) async {
+    try {
+      final response = await _httpClient.get(
+        '/users/$id',
+        options: Options(headers: {'Authorization': AuthUser.bearerTokenHeaderValue ?? ''}),
+      );
+
+      if (response.statusCode == 200) {
+        return User.fromJson(response.data);
+      }
+      throw Exception('Failed to fetch user: ${response.data}');
+    } catch (e) {
+      throw Exception('Get user error: ${e.toString()}');
     }
   }
 
   Future<List<Map<String, dynamic>>> fetchPosts({int page = 0, int offset = 100}) async {
-    final url = Uri.parse('$baseUrl/posts?page=$page&offset=$offset');
+    try {
+      final response = await _httpClient.get(
+        '/posts',
+        queryParameters: {'page': page, 'offset': offset},
+        options: Options(headers: _getHeaders()),
+      );
 
-    final headers = {
-      'x-api-key': apiKey,
-      'Content-Type': 'application/json',
-      if (_token != null) 'Authorization': 'Bearer $_token',
-    };
-
-    final response = await httpClient.get(url, headers: headers);
-
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> responseData = json.decode(response.body);
-      final List<dynamic> data = responseData['data'];
-      return data.cast<Map<String, dynamic>>();
-    } else {
+      if (response.statusCode == 200) {
+        return List<Map<String, dynamic>>.from(response.data['data']);
+      }
       throw Exception('Failed to load posts: ${response.statusCode}');
+    } catch (e) {
+      throw Exception('Fetch posts error: ${e.toString()}');
     }
   }
 
-  Future<User> getUserInfo(String userId) async {
-    final url = Uri.parse('$baseUrl/users/$userId');
-    final response = await httpClient.get(
-      url,
-      headers: {
-        'x-api-key': apiKey,
-        if (_token != null) 'Authorization': 'Bearer $_token',
-      },
-    );
+  void logout() {
+    AuthUser.clearCurrentInstance();
+  }
 
-    if (response.statusCode == 200) {
-      return User.fromJson(json.decode(response.body));
-    } else {
-      throw Exception('Failed to get user info');
-    }
+  Map<String, String> _getHeaders() {
+    return {
+      if (AuthUser.bearerTokenHeaderValue != null) 'Authorization': AuthUser.bearerTokenHeaderValue!,
+      ...defaultHeaders,
+    };
   }
 }
-

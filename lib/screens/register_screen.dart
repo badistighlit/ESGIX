@@ -4,6 +4,7 @@ import '../blocs/auth/auth_bloc.dart';
 import '../blocs/auth/auth_event.dart';
 import '../blocs/auth/auth_state.dart';
 import '../main.dart';
+import 'home_screen.dart';
 import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
