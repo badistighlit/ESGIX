@@ -1,14 +1,13 @@
 import 'dart:developer'; // Pour log
 import 'package:dio/dio.dart';
 
-import 'package:projet_esgix/models/user_model.dart';
+import 'package:projet_esgix/models/auth_user_model.dart';
 
 class ApiService {
   static ApiService? _instance;
   final String baseUrl;
   Map<String, String> defaultHeaders;
   late final Dio _httpClient;
-  late final String _token;
 
   ApiService._({required this.baseUrl, this.defaultHeaders = const {}})
   {
@@ -25,7 +24,7 @@ class ApiService {
     return _instance!;
   }
 
-  Future<User> login(String email, String password) async {
+  Future<void> login(String email, String password) async {
     final response = await _httpClient.post(
       '/auth/login',
       data: {
@@ -38,12 +37,10 @@ class ApiService {
       throw Exception('Failed to login: ${response.data}');
     }
 
-    _token = response.data['token'];
-
-    return User.fromJson(response.data);
+    AuthUser.fromJson(response.data);
   }
 
-  Future<Register> register(String email, String password, String username, String avatar) async {
+  Future<void> register(String email, String password, String username, String avatar) async {
     final response = await _httpClient.post(
       '/auth/register',
       data: {
@@ -54,7 +51,7 @@ class ApiService {
       },
     );
     if (response.statusCode == 200) {
-      return Register.fromJson(response.data);
+      return;
     }
 
     if (response.statusCode == 400) {
@@ -63,6 +60,4 @@ class ApiService {
       throw Exception('Failed to register: ${response.data}');
     }
   }
-
-
 }

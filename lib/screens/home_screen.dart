@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/auth/auth_bloc.dart';
 import '../blocs/auth/auth_state.dart';
-import '../models/user_model.dart';
+import '../models/auth_user_model.dart';
 import 'login_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -23,7 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
         leading: IconButton(
           icon: Icon(Icons.logout),
           onPressed: () {
-            User.clearUser();
+            AuthUser.clearCurrentInstance();
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => LoginScreen()),
@@ -34,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: Icon(Icons.exit_to_app),
             onPressed: () {
-              User.clearUser();
+              AuthUser.clearCurrentInstance();
               Navigator.pushAndRemoveUntil (
                 context,
                 MaterialPageRoute(builder: (_) => LoginScreen()),
