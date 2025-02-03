@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import '../models/comment_model.dart';
-import 'comment_card.dart';  // Assurez-vous d'importer CommentCard
+import 'comment_card.dart';
 
 class CommentList extends StatelessWidget {
-  final List<CommentModel> comments;  // La liste des commentaires à afficher
-
+  final List<CommentModel> comments;
   const CommentList({Key? key, required this.comments}) : super(key: key);
 
   @override

@@ -95,7 +95,7 @@ class ApiService {
       );
 
       if (response.statusCode == 200) {
-        return Map<String, dynamic>.from(response.data['data']);
+        return Map<String, dynamic>.from(response.data);
       }
       throw Exception('Failed to load post: ${response.statusCode}');
     } catch (e) {

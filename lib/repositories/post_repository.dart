@@ -20,16 +20,18 @@ class PostRepository {
   Future<List<CommentModel>> getComments(String idParent) async {
     try {
       final postsJson = await apiService.fetchComments(idParent);
-      return postsJson.map((json) => CommentModel.fromJson(json)).toList();
+      final mapped = postsJson.map((json) => CommentModel.fromJson(json)).toList();
+      return mapped;
     } catch (e) {
       throw Exception('Failed to fetch comments: $e');
     }
   }
 
-  Future<Post> getPostById(String idpost) async {
+Future<Post> getPostById(String idpost) async {
     try {
       final postJson = await apiService.fetchPostById(idpost);
-      return Post.fromJson(postJson);
+      final mapped = Post.fromJson(postJson);
+      return mapped;
     } catch (e) {
       throw Exception('Failed to fetch post by ID: $e');
     }

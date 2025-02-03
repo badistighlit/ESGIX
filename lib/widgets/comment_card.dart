@@ -9,7 +9,7 @@ class CommentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: EdgeInsets.all(8.0),
+      margin: const EdgeInsets.all(8.0),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -17,22 +17,33 @@ class CommentCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                if (comment.author.avatar != null)
-                  CircleAvatar(
-                    backgroundImage: NetworkImage(comment.author.avatar!),
-                  ),
-                SizedBox(width: 8.0),
-                Text(comment.author.username, style: TextStyle(fontWeight: FontWeight.bold)),
+                // Affichage de l'avatar avec une image par défaut si null ou vide
+                CircleAvatar(
+                  backgroundImage: comment.author.avatar != null && comment.author.avatar!.isNotEmpty
+                      ? NetworkImage(comment.author.avatar!)
+                      : const AssetImage('lib/assets/default_avatar.png') as ImageProvider,
+                  radius: 20, // Taille de l'avatar
+                ),
+                const SizedBox(width: 8.0),
+                // Affichage du nom de l'auteur du commentaire
+                Text(
+                  comment.author.username,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
               ],
             ),
-            SizedBox(height: 8.0),
+            const SizedBox(height: 8.0),
 
-            if (comment.imageUrl != null && comment.imageUrl != '')
-              Image.network(comment.imageUrl!),
-            SizedBox(height: 8.0),
+            // Affichage de l'image du commentaire si elle existe
+            if (comment.imageUrl != null && comment.imageUrl!.isNotEmpty)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.network(comment.imageUrl!),
+              ),
+            const SizedBox(height: 8.0),
 
             Text(comment.content),
-            SizedBox(height: 8.0),
+            const SizedBox(height: 8.0),
 
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
