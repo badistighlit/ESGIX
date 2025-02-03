@@ -70,6 +70,7 @@ class ApiService {
     }
   }
 //posts
+  //get posts
   Future<List<Map<String, dynamic>>> fetchPosts({int page = 0, int offset = 100}) async {
     try {
       final response = await _httpClient.get(
@@ -87,10 +88,12 @@ class ApiService {
     }
   }
 
-  Future<Map<String, dynamic>> fetchPostById(String idpost) async {
+
+  // get post by id
+  Future<Map<String, dynamic>> fetchPostById(String idPost) async {
     try {
       final response = await _httpClient.get(
-        '/posts/$idpost',
+        '/posts/$idPost',
         options: Options(headers: _getHeaders()),
       );
 
@@ -103,7 +106,21 @@ class ApiService {
     }
   }
 
+// Like post
+  Future <bool> likePost (String idPost) async {
+    try{
+      final response = await _httpClient.post('/likes/$idPost',options:  Options(headers: _getHeaders()),);
+      if (response.statusCode == 200 ||response.statusCode == 201 || response.statusCode == 204) {
+        return true;
+      } else {
+        throw Exception('Failed to like a post : ${response.statusCode}');
+      }
 
+    }
+        catch(e)
+    {throw Exception("Liking post error : ${e.toString()}");}
+
+  }
   //comments
   Future<List<Map<String, dynamic>>> fetchComments(String idParent) async {
     try {

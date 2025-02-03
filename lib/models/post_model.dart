@@ -1,31 +1,30 @@
 class Post {
-final String id;
-final String? idParent;
-final Author author;
-final DateTime createdAt;
-DateTime? updatedAt;
-final String ? imageUrl;
-String content;
+ final String id;
+ final String? idParent;
+ final Author author;
+ final DateTime createdAt;
+ DateTime? updatedAt;
+ final String? imageUrl;
+ String content;
  int likesCount;
  int commentsCount;
+ bool likedByUser;
 
-
-//constructeur
-
-Post({
- required this.id,
- this.idParent,
- required this.author,
- required this.content,
- required this.createdAt,
+ // Constructeur
+ Post({
+  required this.id,
+  this.idParent,
+  required this.author,
+  required this.content,
+  required this.createdAt,
   this.updatedAt,
- this.imageUrl,
- required this.commentsCount,
- required this.likesCount,
-});
+  this.imageUrl,
+  required this.commentsCount,
+  required this.likesCount,
+  required this.likedByUser,
+ });
 
-
- // Mapping de Json en objet
+ // Mapping de JSON en objet
  factory Post.fromJson(Map<String, dynamic> json) {
   return Post(
    id: json['id'] as String,
@@ -33,15 +32,15 @@ Post({
    author: Author.fromJson(json['author']),
    content: json['content'] as String,
    createdAt: DateTime.parse(json['createdAt'] as String),
-   updatedAt: DateTime.parse(json['updatedAt'] as String),
+   updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
    imageUrl: json['imageUrl'] as String?,
    commentsCount: json['commentsCount'] as int,
    likesCount: json['likesCount'] as int,
+   likedByUser: json['likedByUser'] as bool,
   );
  }
 
  // Mapping d'objet en JSON
-
  Map<String, dynamic> toJson() {
   return {
    'id': id,
@@ -53,29 +52,24 @@ Post({
    'imageUrl': imageUrl,
    'commentsCount': commentsCount,
    'likesCount': likesCount,
+   'likedByUser': likedByUser,
   };
  }
-
-
-
-
-
-
-
 }
-
 
 class Author {
  final String id;
  final String username;
  final String? avatar;
-//constructeur
+
+ // Constructeur
  Author({
   required this.id,
   required this.username,
   this.avatar,
  });
-// MApping de Json en modele
+
+ // Mapping de JSON en modèle
  factory Author.fromJson(Map<String, dynamic> json) {
   return Author(
    id: json['id'] as String,
@@ -84,7 +78,7 @@ class Author {
   );
  }
 
- // MApping de modele en JSON
+ // Mapping de modèle en JSON
  Map<String, dynamic> toJson() {
   return {
    'id': id,

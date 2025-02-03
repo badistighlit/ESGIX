@@ -62,7 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return const Center(child: Text("Aucun post disponible."));
                 } else {
-                  return PostList(posts: snapshot.data!);
+                  return PostList(posts: snapshot.data!, postRepository: postRepository,);
                 }
               },
             );

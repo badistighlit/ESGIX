@@ -1,4 +1,6 @@
 
+
+
 import 'package:projet_esgix/models/comment_model.dart';
 
 import '../models/post_model.dart';
@@ -17,6 +19,8 @@ class PostRepository {
       throw Exception('Failed to fetch posts: $e');
     }
   }
+
+
   Future<List<CommentModel>> getComments(String idParent) async {
     try {
       final postsJson = await apiService.fetchComments(idParent);
@@ -27,13 +31,24 @@ class PostRepository {
     }
   }
 
-Future<Post> getPostById(String idpost) async {
+
+Future<Post> getPostById(String idPost) async {
     try {
-      final postJson = await apiService.fetchPostById(idpost);
+      final postJson = await apiService.fetchPostById(idPost);
       final mapped = Post.fromJson(postJson);
       return mapped;
     } catch (e) {
       throw Exception('Failed to fetch post by ID: $e');
     }
   }
+
+Future <bool> likePost (String idPost) async {
+    try {
+      final response = await apiService.likePost(idPost);
+      return response;
+    }
+        catch(e)
+  {  throw Exception('Failed to like post : $e');}
+}
+
 }

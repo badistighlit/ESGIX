@@ -50,7 +50,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
 
-              PostCard(post: post),
+              PostCard(post: post, postRepository: _postRepository,),
 
               Expanded(
                 child: FutureBuilder<List<CommentModel>>(
