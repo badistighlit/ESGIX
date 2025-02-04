@@ -42,6 +42,16 @@ Future<Post> getPostById(String idPost) async {
     }
   }
 
+
+Future<bool> createPost (String content, String? imageUrl) async {
+  try {
+    final response = await apiService.createPost(content,imageUrl);
+    return response;
+  }
+  catch(e)
+  {  throw Exception('Failed to create post : $e');}
+}
+
 Future <bool> likePost (String idPost) async {
     try {
       final response = await apiService.likePost(idPost);
@@ -50,5 +60,15 @@ Future <bool> likePost (String idPost) async {
         catch(e)
   {  throw Exception('Failed to like post : $e');}
 }
+
+
+  Future<bool> createComment (String content, String? imageUrl, String idParent) async {
+    try {
+      final response = await apiService.createComment(content,imageUrl,idParent);
+      return response;
+    }
+    catch(e)
+    {  throw Exception('Failed to create comment : $e');}
+  }
 
 }

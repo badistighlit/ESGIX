@@ -7,6 +7,7 @@ import '../models/post_model.dart';
 import '../repositories/post_repository.dart';
 import '../services/api_service.dat.dart';
 import '../widgets/post_list_screen.dart';
+import 'CreatePostScreen.dart';
 import 'login_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -37,6 +38,19 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _navigateToCreatePostScreen() async {
+    final bool? postCreated = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => CreatePostScreen(postRepository: postRepository)),
+    );
+
+    if (postCreated == true) {
+      setState(() {
+        _postsFuture = postRepository.getPosts(); // Rafraîchir les posts après création
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return const Center(child: Text("Aucun post disponible."));
                 } else {
-                  return PostList(posts: snapshot.data!, postRepository: postRepository,);
+                  return PostList(posts: snapshot.data!, postRepository: postRepository);
                 }
               },
             );
@@ -70,6 +84,10 @@ class _HomeScreenState extends State<HomeScreen> {
             return const Center(child: Text("Vous n'êtes pas connecté."));
           }
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _navigateToCreatePostScreen,
+        child: const Icon(Icons.add),
       ),
       drawer: Drawer(
         child: ListView(
@@ -88,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
               leading: const Icon(Icons.settings),
               title: const Text('Paramètres'),
               onTap: () {
-                // Ajoute la navigation vers les paramètres ici
+                // Navigation vers les paramètres ici
               },
             ),
           ],

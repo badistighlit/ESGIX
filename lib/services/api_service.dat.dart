@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:projet_esgix/models/auth_user_model.dart';
 import 'package:projet_esgix/models/user_model.dart';
@@ -121,6 +122,28 @@ class ApiService {
     {throw Exception("Liking post error : ${e.toString()}");}
 
   }
+
+  //create post
+  Future<bool> createPost(String content, String? imageUrl) async {
+    try {
+      final response = await _httpClient.post(
+        '/posts',
+        options: Options(headers: _getHeaders()),
+        data: {
+          'content': content,
+          if (imageUrl != null) 'imageUrl': imageUrl,
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      throw Exception("Creating post error: ${e.toString()}");
+    }
+  }
   //comments
   Future<List<Map<String, dynamic>>> fetchComments(String idParent) async {
     try {
@@ -136,6 +159,28 @@ class ApiService {
       throw Exception('Failed to load comments: ${response.statusCode}');
     } catch (e) {
       throw Exception('Fetch posts error: ${e.toString()}');
+    }
+  }
+
+  Future<bool> createComment(String content, String? imageUrl, String idParent) async {
+    try {
+      final response = await _httpClient.post(
+        '/posts',
+        options: Options(headers: _getHeaders()),
+        data: {
+          'content': content,
+          if (imageUrl != null) 'imageUrl': imageUrl,
+          'parent' : idParent
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      throw Exception("Creating comment error: ${e.toString()}");
     }
   }
 

@@ -79,14 +79,15 @@ class _PostCardState extends State<PostCard> {
                 ],
               ),
               const SizedBox(height: 8.0),
+
+              const SizedBox(height: 8.0),
+              Text(widget.post.content),
               // Image du post (si elle existe)
               if (widget.post.imageUrl != null && widget.post.imageUrl!.isNotEmpty)
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: Image.network(widget.post.imageUrl!),
                 ),
-              const SizedBox(height: 8.0),
-              Text(widget.post.content),
               const SizedBox(height: 8.0),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -98,11 +99,11 @@ class _PostCardState extends State<PostCard> {
                       IconButton(
                         icon: Icon(
                           Icons.favorite,
-                          color: _likedByUser ? Colors.red : Colors.grey, // Couleur du cœur (rouge si liké, gris sinon)
+                          color: _likedByUser ? Colors.red : Colors.grey,
                         ),
                         onPressed: _toggleLike, // Appel à la méthode pour liker ou unliker
-                        splashColor: Colors.transparent, // Enlever l'animation de splash
-                        highlightColor: Colors.transparent, // Enlever l'animation de surbrillance
+                        splashColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
                       ),
                     ],
                   ),
