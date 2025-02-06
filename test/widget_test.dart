@@ -17,9 +17,9 @@ void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await dotenv.load();
-    final ApiService apiService = ApiService(baseUrl: 'https://esgix.tech', httpClient: http.Client());
+    final ApiService apiService = ApiService(baseUrl: 'https://esgix.tech');
     final AuthRepository authRepository = AuthRepositoryImpl(apiService);
-    await tester.pumpWidget(MyApp(authRepository: authRepository));
+    await tester.pumpWidget(MyApp(authRepository: authRepository, apiService: null,));
 
     // Verify that our counter starts at 0.
     expect(find.text('0'), findsOneWidget);

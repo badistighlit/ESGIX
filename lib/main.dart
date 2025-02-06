@@ -15,6 +15,7 @@ ApiService initApiService() {
       });
 }
 
+
 Future<void> main() async {
   await dotenv.load();
   final apiService = initApiService();

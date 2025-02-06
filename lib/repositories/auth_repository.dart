@@ -1,3 +1,7 @@
+import 'package:projet_esgix/models/user_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../models/auth_user_model.dart';
+import '../services/api_service.dat.dart';
 import '../services/api_service.dat.dart';
 
 abstract class AuthRepository {

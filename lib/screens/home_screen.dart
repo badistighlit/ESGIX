@@ -1,10 +1,13 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/auth/auth_bloc.dart';
 import '../blocs/auth/auth_state.dart';
 import '../models/auth_user_model.dart';
+import '../models/post_model.dart';
+import '../repositories/post_repository.dart';
+import '../services/api_service.dat.dart';
+import '../widgets/post_list_screen.dart';
+import 'CreatePostScreen.dart';
 import 'login_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -15,83 +18,95 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  late PostRepository postRepository;
+  late Future<List<Post>> _postsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    final apiService = ApiService(baseUrl: 'https://esgix.tech');
+    postRepository = PostRepository(apiService: apiService);
+    _postsFuture = postRepository.getPosts();
+  }
+
+  void _logout(BuildContext context) {
+    AuthUser.clearCurrentInstance();
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => LoginScreen()),
+          (Route<dynamic> route) => false,
+    );
+  }
+
+  void _navigateToCreatePostScreen() async {
+    final bool? postCreated = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => CreatePostScreen(postRepository: postRepository)),
+    );
+
+    if (postCreated == true) {
+      setState(() {
+        _postsFuture = postRepository.getPosts();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Home Page"),
-        leading: IconButton(
-          icon: Icon(Icons.logout),
-          onPressed: () {
-            AuthUser.clearCurrentInstance();
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => LoginScreen()),
-            );
-          },
-        ),
+        title: const Text("Home Page"),
         actions: [
           IconButton(
-            icon: Icon(Icons.exit_to_app),
-            onPressed: () {
-              AuthUser.clearCurrentInstance();
-              Navigator.pushAndRemoveUntil (
-                context,
-                MaterialPageRoute(builder: (_) => LoginScreen()),
-                    (Route<dynamic> route) => false,
-              );
-            }
+            icon: const Icon(Icons.exit_to_app),
+            onPressed: () => _logout(context),
           ),
         ],
       ),
       body: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, state) {
           if (state is AuthSuccess) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text("Bienvenue, ${state.username}!", style: TextStyle(fontSize: 24)),
-                  SizedBox(height: 20),
-                  Text("Voici la page d'accueil de l'application.", style: TextStyle(fontSize: 18)),
-                ],
-              ),
+            return FutureBuilder<List<Post>>(
+              future: _postsFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text("Erreur : ${snapshot.error}"));
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text("Aucun post disponible."));
+                } else {
+                  return PostList(posts: snapshot.data!, postRepository: postRepository);
+                }
+              },
             );
           } else {
-            return Center(
-              child: Text("Vous n'êtes pas connecté."),
-            );
+            return const Center(child: Text("Vous n'êtes pas connecté."));
           }
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _navigateToCreatePostScreen,
+        child: const Icon(Icons.add),
       ),
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
-            DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.blue,
-              ),
-              child: Text(
-                'Menu',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                ),
-              ),
+            const DrawerHeader(
+              decoration: BoxDecoration(color: Colors.blue),
+              child: Text('Menu', style: TextStyle(color: Colors.white, fontSize: 24)),
             ),
             ListTile(
-              leading: Icon(Icons.home),
-              title: Text('Accueil'),
-              onTap: () {
-                Navigator.pop(context);
-              },
+              leading: const Icon(Icons.home),
+              title: const Text('Accueil'),
+              onTap: () => Navigator.pop(context),
             ),
             ListTile(
-              leading: Icon(Icons.settings),
-              title: Text('Paramètres'),
+              leading: const Icon(Icons.settings),
+              title: const Text('Paramètres'),
               onTap: () {
-                // Ajoute la navigation vers la page des paramètres ici
+
               },
             ),
           ],
