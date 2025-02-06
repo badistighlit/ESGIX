@@ -46,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (postCreated == true) {
       setState(() {
-        _postsFuture = postRepository.getPosts(); // Rafraîchir les posts après création
+        _postsFuture = postRepository.getPosts();
       });
     }
   }
@@ -106,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
               leading: const Icon(Icons.settings),
               title: const Text('Paramètres'),
               onTap: () {
-                // Navigation vers les paramètres ici
+
               },
             ),
           ],

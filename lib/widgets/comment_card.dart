@@ -17,15 +17,15 @@ class CommentCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                // Affichage de l'avatar avec une image par défaut si null ou vide
+
                 CircleAvatar(
                   backgroundImage: comment.author.avatar != null && comment.author.avatar!.isNotEmpty
                       ? NetworkImage(comment.author.avatar!)
                       : const AssetImage('lib/assets/default_avatar.png') as ImageProvider,
-                  radius: 20, // Taille de l'avatar
+                  radius: 20,
                 ),
                 const SizedBox(width: 8.0),
-                // Affichage du nom de l'auteur du commentaire
+
                 Text(
                   comment.author.username,
                   style: const TextStyle(fontWeight: FontWeight.bold),
@@ -34,7 +34,6 @@ class CommentCard extends StatelessWidget {
             ),
             const SizedBox(height: 8.0),
 
-            // Affichage de l'image du commentaire si elle existe
             if (comment.imageUrl != null && comment.imageUrl!.isNotEmpty)
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),

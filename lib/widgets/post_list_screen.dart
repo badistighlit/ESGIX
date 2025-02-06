@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import '../models/post_model.dart';
 import 'post_card.dart';
-import '../repositories/post_repository.dart';  // Assurez-vous d'importer le repository
+import '../repositories/post_repository.dart';
 
 class PostList extends StatelessWidget {
   final List<Post> posts;
   final bool isLoading;
-  final PostRepository postRepository; // Ajout du repository
+  final PostRepository postRepository;
 
   const PostList({Key? key, required this.posts, required this.postRepository, this.isLoading = false}) : super(key: key);
 
@@ -26,7 +26,7 @@ class PostList extends StatelessWidget {
       itemBuilder: (context, index) {
         return PostCard(
           post: posts[index],
-          postRepository: postRepository,  // Passer l'instance du repository ici
+          postRepository: postRepository,
         );
       },
     );

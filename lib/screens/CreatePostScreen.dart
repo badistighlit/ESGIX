@@ -36,7 +36,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Post créé avec succès !"), backgroundColor: Colors.green),
       );
-      Navigator.pop(context, true); // Retour à HomeScreen avec succès
+      Navigator.pop(context, true);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Erreur lors de la création du post."), backgroundColor: Colors.red),

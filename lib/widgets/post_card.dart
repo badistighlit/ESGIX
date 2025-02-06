@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import '../models/post_model.dart';
 import '../screens/post_detail_screen.dart'; // Assurez-vous d'importer l'écran de détails
-import '../repositories/post_repository.dart'; // Importer le repository
+import '../repositories/post_repository.dart';
 
 class PostCard extends StatefulWidget {
   final Post post;
-  final PostRepository postRepository; // Ajout du repository pour liker le post
+  final PostRepository postRepository;
 
   const PostCard({Key? key, required this.post, required this.postRepository}) : super(key: key);
 
@@ -14,32 +14,32 @@ class PostCard extends StatefulWidget {
 }
 
 class _PostCardState extends State<PostCard> {
-  late bool _likedByUser; // Variable d'état pour suivre le like
+  late bool _likedByUser;
 
   @override
   void initState() {
     super.initState();
-    _likedByUser = widget.post.likedByUser; // Initialisation avec l'état du like actuel
+    _likedByUser = widget.post.likedByUser;
   }
 
-  // Méthode pour gérer le "like" ou "unlike" du post
+
   Future<void> _toggleLike() async {
     try {
       final liked = await widget.postRepository.likePost(widget.post.id);
 
       setState(() {
-        // Si l'opération a réussi, inverse l'état du like
+
         if (liked) {
-          _likedByUser = !_likedByUser; // Inverse l'état du like
+          _likedByUser = !_likedByUser;
           if (_likedByUser) {
-            widget.post.likesCount++; // Si l'utilisateur a liké, on augmente le count
+            widget.post.likesCount++;
           } else {
-            widget.post.likesCount--; // Sinon, on décrémente le count
+            widget.post.likesCount--;
           }
         }
       });
     } catch (e) {
-      // Affiche un message d'erreur en cas d'échec
+
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
     }
   }
@@ -51,7 +51,7 @@ class _PostCardState extends State<PostCard> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => PostDetailScreen(postId: widget.post.id), // Passez l'ID du post au PostDetailScreen
+            builder: (context) => PostDetailScreen(postId: widget.post.id),
           ),
         );
       },
@@ -64,7 +64,7 @@ class _PostCardState extends State<PostCard> {
             children: [
               Row(
                 children: [
-                  // Avatar de l'auteur
+                  // Avatar
                   CircleAvatar(
                     backgroundImage: widget.post.author.avatar != null && widget.post.author.avatar!.isNotEmpty
                         ? NetworkImage(widget.post.author.avatar!)
@@ -82,7 +82,7 @@ class _PostCardState extends State<PostCard> {
 
               const SizedBox(height: 8.0),
               Text(widget.post.content),
-              // Image du post (si elle existe)
+
               if (widget.post.imageUrl != null && widget.post.imageUrl!.isNotEmpty)
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
@@ -92,7 +92,6 @@ class _PostCardState extends State<PostCard> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Nombre de likes avec l'icône du cœur
                   Row(
                     children: [
                       Text('Likes: ${widget.post.likesCount}'),
@@ -101,13 +100,13 @@ class _PostCardState extends State<PostCard> {
                           Icons.favorite,
                           color: _likedByUser ? Colors.red : Colors.grey,
                         ),
-                        onPressed: _toggleLike, // Appel à la méthode pour liker ou unliker
+                        onPressed: _toggleLike,
                         splashColor: Colors.transparent,
                         highlightColor: Colors.transparent,
                       ),
                     ],
                   ),
-                  // Nombre de commentaires
+
                   Text('Comments: ${widget.post.commentsCount}'),
                 ],
               ),

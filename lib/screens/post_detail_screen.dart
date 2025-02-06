@@ -52,7 +52,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       if (success) {
         _commentController.clear();
         _imageUrlController.clear();
-        _loadPostAndComments(); // Rafraîchir les commentaires après l'ajout
+        _loadPostAndComments();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Commentaire ajouté avec succès !")),
         );
