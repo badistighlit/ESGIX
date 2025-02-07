@@ -46,3 +46,29 @@ app.*.map.json
 
 # Fichier d'environnement
 .env
+
+# Flutter & Dart build files
+build/
+.packages
+
+# iOS/macOS build files
+ios/Flutter/
+ios/Pods/
+ios/Podfile.lock
+macos/Flutter/
+macos/Pods/
+macos/Podfile.lock
+
+# Android build files
+android/.gradle/
+android/local.properties
+
+# IDE settings
+.vscode/
+
+# Logs & temporary files
+*.tmp
+
+# Secrets & environment variables
+.env.*
+firebase_options.dart

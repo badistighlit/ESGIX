@@ -8,7 +8,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:http/http.dart' as http;
 import 'package:projet_esgix/main.dart';
 import 'package:projet_esgix/repositories/auth_repository.dart';
 import 'package:projet_esgix/services/api_service.dat.dart';
