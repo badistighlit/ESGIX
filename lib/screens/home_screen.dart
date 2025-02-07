@@ -51,6 +51,12 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void _reloadPosts() {
+    setState(() {
+      _postsFuture = postRepository.getPosts();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,6 +66,10 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.exit_to_app),
             onPressed: () => _logout(context),
+          ),
+          IconButton(
+            icon: const Icon(Icons.change_circle_rounded),
+            onPressed: () => _reloadPosts(),
           ),
         ],
       ),
@@ -76,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return const Center(child: Text("Aucun post disponible."));
                 } else {
-                  return PostList(posts: snapshot.data!, postRepository: postRepository);
+                  return PostList(posts: snapshot.data!, postRepository: postRepository, onPostDeleted: _reloadPosts);
                 }
               },
             );

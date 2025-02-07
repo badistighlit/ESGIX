@@ -52,6 +52,15 @@ Future<bool> createPost (String content, String? imageUrl) async {
   {  throw Exception('Failed to create post : $e');}
 }
 
+  Future<bool> updatePost (String idPost, String content, String? imageUrl) async {
+    try {
+      final response = await apiService.updatePost(idPost, content, imageUrl);
+      return response;
+    }
+    catch(e)
+    {  throw Exception('Failed to update post : $e');}
+  }
+
 Future <bool> likePost (String idPost) async {
     try {
       final response = await apiService.likePost(idPost);
@@ -71,4 +80,12 @@ Future <bool> likePost (String idPost) async {
     {  throw Exception('Failed to create comment : $e');}
   }
 
+  Future<bool> deletePostById(String idPost) async {
+    try {
+      await apiService.deletePostById(idPost);
+      return true;
+    } catch (e) {
+      throw Exception('Failed to delete post by ID: $e');
+    }
+  }
 }
