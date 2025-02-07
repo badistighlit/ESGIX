@@ -18,7 +18,7 @@ class AppStarted extends AuthEvent {}
 
 class LoggedIn extends AuthEvent {}
 
-class LoggedOut extends AuthEvent {}
+class LogOut extends AuthEvent {}
 
 class Register extends AuthEvent {
   final String email;

@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:projet_esgix/blocs/user/user_bloc.dart';
+import 'package:projet_esgix/models/auth_user_model.dart';
+import 'package:projet_esgix/repositories/user_repository.dart';
+import 'package:projet_esgix/screens/home_screen.dart';
 import 'package:projet_esgix/screens/register_screen.dart';
+import 'package:projet_esgix/screens/user_profile_screen.dart';
+import 'package:projet_esgix/services/api_service.dat.dart';
 import '../blocs/auth/auth_bloc.dart';
 import '../blocs/auth/auth_event.dart';
 import '../blocs/auth/auth_state.dart';
@@ -23,6 +29,12 @@ class _LoginScreenState extends State<LoginScreen> {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthSuccess) {
+          Widget screen = BlocProvider(
+            create: (context) => UserBloc(repository: UserRepository(ApiService.instance!)),
+            child: UserProfileScreen(userId: AuthUser.id!),
+          );
+
+          // Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => screen));
           Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomeScreen()));
         } else if (state is AuthFailure) {
           showDialog(

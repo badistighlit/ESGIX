@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:projet_esgix/blocs/auth/auth_event.dart';
 import '../blocs/auth/auth_bloc.dart';
 import '../blocs/auth/auth_state.dart';
 import '../models/auth_user_model.dart';
@@ -11,7 +12,7 @@ import 'CreatePostScreen.dart';
 import 'login_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -30,7 +31,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _logout(BuildContext context) {
-    AuthUser.clearCurrentInstance();
+    context.read<AuthBloc>().add(LogOut());
+
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => LoginScreen()),
