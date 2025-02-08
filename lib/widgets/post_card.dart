@@ -10,8 +10,15 @@ class PostCard extends StatefulWidget {
   final Post post;
   final PostRepository postRepository;
   final Function? onPostDeleted;
+  final Function? backFromDetails;
 
-  const PostCard({Key? key, required this.post, required this.postRepository, this.onPostDeleted}) : super(key: key);
+  const PostCard({
+    Key? key,
+    required this.post,
+    required this.postRepository,
+    this.onPostDeleted,
+    this.backFromDetails,
+  }) : super(key: key);
 
   @override
   _PostCardState createState() => _PostCardState();
@@ -123,10 +130,10 @@ class _PostCardState extends State<PostCard> {
                   });
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Erreur lors de la suppression: $e'))
-                );
-              };
-            },
+                      SnackBar(content: Text('Erreur lors de la suppression: $e'))
+                  );
+                };
+              },
               child: Text('Oui'),
             ),
           ],
@@ -138,13 +145,10 @@ class _PostCardState extends State<PostCard> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => PostDetailScreen(postId: widget.post.id),
-          ),
-        );
+      onTap: () async {
+        if (widget.backFromDetails != null) {
+          widget.backFromDetails!(widget.post.id);
+        }
       },
       child: Card(
         margin: const EdgeInsets.all(8.0),

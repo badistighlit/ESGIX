@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:projet_esgix/screens/post_detail_screen.dart';
 import '../blocs/auth/auth_bloc.dart';
 import '../blocs/auth/auth_state.dart';
 import '../models/auth_user_model.dart';
@@ -51,6 +52,19 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void _navigateToPostDetailScreen(String postId) async {
+    final bool? postUpdated = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PostDetailScreen(postId: postId),
+      ),
+    );
+
+    if (postUpdated == true) {
+      _reloadPosts();
+    }
+  }
+
   void _reloadPosts() {
     setState(() {
       _postsFuture = postRepository.getPosts();
@@ -86,7 +100,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return const Center(child: Text("Aucun post disponible."));
                 } else {
-                  return PostList(posts: snapshot.data!, postRepository: postRepository, onPostDeleted: _reloadPosts);
+                  return PostList(
+                      posts: snapshot.data!,
+                      postRepository: postRepository,
+                      onPostDeleted: _reloadPosts,
+                      backFromDetails: _navigateToPostDetailScreen
+                  );
                 }
               },
             );

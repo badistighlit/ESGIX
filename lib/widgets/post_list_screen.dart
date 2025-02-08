@@ -8,13 +8,15 @@ class PostList extends StatelessWidget {
   final bool isLoading;
   final PostRepository postRepository;
   final Function? onPostDeleted;
+  final Function? backFromDetails;
 
   const PostList({
     Key? key,
     required this.posts,
     required this.postRepository,
     this.onPostDeleted,
-    this.isLoading = false
+    this.backFromDetails,
+    this.isLoading = false,
   }) : super(key: key);
 
   @override
@@ -34,7 +36,8 @@ class PostList extends StatelessWidget {
         return PostCard(
           post: posts[index],
           postRepository: postRepository,
-          onPostDeleted: onPostDeleted, // Transmission du callback
+          onPostDeleted: onPostDeleted,
+          backFromDetails : backFromDetails
         );
       },
     );
