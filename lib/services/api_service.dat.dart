@@ -1,7 +1,6 @@
-import 'dart:async';
+import 'dart:core';
 import 'package:dio/dio.dart';
 import 'package:projet_esgix/models/auth_user_model.dart';
-import 'package:projet_esgix/models/user_model.dart';
 
 class ApiService {
   static ApiService? _instance;
@@ -60,7 +59,7 @@ class ApiService {
     }
   }
 
-  Future<User> getUserById(String id, [String? token]) async {
+  Future<Map<String, dynamic>> getUserById(String id, [String? token]) async {
     try {
       final response = await _httpClient.get(
         '/users/$id',
@@ -68,7 +67,7 @@ class ApiService {
       );
 
       if (response.statusCode == 200) {
-        return User.fromJson(response.data);
+        return response.data;
       }
       throw Exception('Failed to fetch user: ${response.data}');
     } catch (e) {
@@ -113,7 +112,7 @@ class ApiService {
   }
 
 // Like post
-  Future <bool> likePost (String idPost) async {
+  Future<bool> likePost (String idPost) async {
     try{
       final response = await _httpClient.post('/likes/$idPost',options:  Options(headers: _getHeaders()),);
       if (response.statusCode == 200 ||response.statusCode == 201 || response.statusCode == 204) {
@@ -186,6 +185,27 @@ class ApiService {
       }
     } catch (e) {
       throw Exception("Creating comment error: ${e.toString()}");
+    }
+  }
+
+  Future<Map<String, dynamic>> fetchUserPosts(String userId, {bool liked = false, int page = 0, int offset = 0}) async {
+    try {
+      final response = await _httpClient.get(
+        '/user/$userId/${liked ? 'likes' : 'posts'}',
+        options: Options(headers: _getHeaders()),
+        queryParameters: {
+          'page': page,
+          'offset': offset,
+        }
+      );
+
+      if (response.statusCode == 200) {
+        return response.data;
+      }
+
+      return Map.of({});
+    } catch (e) {
+      throw Exception("Error fetching posts for user: ${e.toString()}");
     }
   }
 

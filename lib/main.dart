@@ -41,21 +41,25 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   void initState() {
-    super.initState();
-
     context.read<AuthBloc>().add(AppStarted());
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
-         return MaterialApp(
-          title: 'Projet Esgix',
-          theme: ThemeData(primarySwatch: Colors.blue),
-          home: state is AuthSuccess
-          ? HomeScreen()
-          : LoginScreen(),
-        );
+          return MaterialApp(
+            title: 'Projet Esgix',
+            theme: ThemeData(primarySwatch: Colors.blue),
+            home: state is AuthSuccess
+                  ?
+                  //   BlocProvider(
+                  //   create: (context) => UserBloc(repository: UserRepository(ApiService.instance!)),
+                  //   child: UserProfileScreen(userId: AuthUser.id!),
+                  // )
+                  HomeScreen()
+                  : LoginScreen(),
+          );
     });
   }
 }

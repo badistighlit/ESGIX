@@ -3,12 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:projet_esgix/blocs/auth/auth_event.dart';
 import '../blocs/auth/auth_bloc.dart';
 import '../blocs/auth/auth_state.dart';
-import '../models/auth_user_model.dart';
 import '../models/post_model.dart';
 import '../repositories/post_repository.dart';
 import '../services/api_service.dat.dart';
 import '../widgets/post_list_screen.dart';
-import 'CreatePostScreen.dart';
+import 'create_post_screen.dart';
 import 'login_screen.dart';
 
 class HomeScreen extends StatefulWidget {

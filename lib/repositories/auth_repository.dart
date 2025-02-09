@@ -21,8 +21,8 @@ class AuthRepositoryImpl implements AuthRepository {
     String? authUserId = await LocalDataService.getAuthUserId();
 
     if (token != null && authUserId != null) {
-      User user = await apiService.getUserById(authUserId, 'Bearer $token');
-      AuthUser.fromUser(user, token);
+      final userData = await apiService.getUserById(authUserId, 'Bearer $token');
+      AuthUser.fromUser(User.fromJson(userData), token);
 
       return true;
     }

@@ -14,9 +14,9 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       try {
         final user = await repository.getUserById(event.id);
 
-        emit(state.copyWith(status: Status.success, user: user));
+        emit(state.copyWith(status: UserStateStatus.success, user: user));
       } catch (e) {
-        emit(state.copyWith(status: Status.failure));
+        emit(state.copyWith(status: UserStateStatus.failure));
         throw AppException.from(e);
       }
     });

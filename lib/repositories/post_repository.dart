@@ -1,5 +1,4 @@
-
-
+import 'dart:developer';
 
 import 'package:projet_esgix/models/comment_model.dart';
 
@@ -43,7 +42,7 @@ Future<Post> getPostById(String idPost) async {
   }
 
 
-Future<bool> createPost (String content, String? imageUrl) async {
+Future<bool> createPost(String content, String? imageUrl) async {
   try {
     final response = await apiService.createPost(content,imageUrl);
     return response;
@@ -52,7 +51,7 @@ Future<bool> createPost (String content, String? imageUrl) async {
   {  throw Exception('Failed to create post : $e');}
 }
 
-Future <bool> likePost (String idPost) async {
+Future <bool> likePost(String idPost) async {
     try {
       final response = await apiService.likePost(idPost);
       return response;
@@ -62,7 +61,7 @@ Future <bool> likePost (String idPost) async {
 }
 
 
-  Future<bool> createComment (String content, String? imageUrl, String idParent) async {
+  Future<bool> createComment(String content, String? imageUrl, String idParent) async {
     try {
       final response = await apiService.createComment(content,imageUrl,idParent);
       return response;
@@ -71,4 +70,14 @@ Future <bool> likePost (String idPost) async {
     {  throw Exception('Failed to create comment : $e');}
   }
 
+  Future<List<Post>> getUserPosts(String userId, {bool liked = false, int page = 0, int offset = 0}) async {
+    try {
+      Map<String, dynamic> postsJson = await apiService.fetchUserPosts(userId, liked: liked, page: page, offset: offset);
+
+      return List.of(postsJson['data']).map((json) => Post.fromJson(json)).toList();
+    } catch (e) {
+      log(e.toString());
+      throw Exception('Failed to fetch posts: $e');
+    }
+  }
 }

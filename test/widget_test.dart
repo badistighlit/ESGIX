@@ -18,7 +18,7 @@ void main() {
     await dotenv.load();
     final ApiService apiService = ApiService(baseUrl: 'https://esgix.tech');
     final AuthRepository authRepository = AuthRepositoryImpl(apiService);
-    await tester.pumpWidget(MyApp(authRepository: authRepository, apiService: null,));
+    await tester.pumpWidget(MyApp(authRepository: authRepository));
 
     // Verify that our counter starts at 0.
     expect(find.text('0'), findsOneWidget);
