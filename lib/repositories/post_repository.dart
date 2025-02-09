@@ -95,6 +95,7 @@ Future <bool> likePost (String idPost) async {
   Future<bool> deletePostById(String idPost) async {
     try {
       await apiService.deletePostById(idPost);
+
       return true;
     } catch (e) {
       throw Exception('Failed to delete post by ID: $e');

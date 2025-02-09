@@ -6,10 +6,9 @@ import 'package:projet_esgix/blocs/post_list/post_list_bloc.dart';
 import 'package:projet_esgix/exceptions/global/app_exception.dart';
 import 'package:projet_esgix/screens/post_detail_screen.dart';
 import 'package:projet_esgix/widgets/post_card.dart';
-import '../blocs/auth/auth_bloc.dart';
-import '../models/post_model.dart';
-import '../repositories/post_repository.dart';
-import '../services/api_service.dat.dart';
+import 'package:projet_esgix/blocs/auth/auth_bloc.dart';
+import 'package:projet_esgix/models/post_model.dart';
+import 'package:projet_esgix/repositories/post_repository.dart';
 import 'create_post_screen.dart';
 import 'login_screen.dart';
 
@@ -127,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
     padding: const EdgeInsets.all(8.0),
     itemCount: posts.length,
     itemBuilder: (context, index) {
-      return BlocProvider(
+      return BlocProvider<PostBloc>(
         create: (context) => PostBloc(repository: context.read<PostRepository>()),
         child: PostCard(
             post: posts[index],

@@ -1,13 +1,12 @@
 // CreatePostScreen.dart
 import 'package:flutter/material.dart';
 import '../repositories/post_repository.dart';
-import '../models/post_model.dart';
 
 class CreatePostScreen extends StatefulWidget {
   final PostRepository postRepository;
   final String? idPost;
 
-  const CreatePostScreen({Key? key, required this.postRepository, this.idPost}) : super(key: key);
+  const CreatePostScreen({super.key, required this.postRepository, this.idPost});
 
   @override
   _CreatePostScreenState createState() => _CreatePostScreenState();

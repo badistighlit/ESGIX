@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:projet_esgix/blocs/post_list/post_list_bloc.dart';
@@ -7,9 +5,9 @@ import 'package:projet_esgix/repositories/post_repository.dart';
 import 'package:projet_esgix/screens/home_screen.dart';
 import 'package:projet_esgix/screens/register_screen.dart';
 import 'package:projet_esgix/services/api_service.dat.dart';
-import '../blocs/auth/auth_bloc.dart';
-import '../blocs/auth/auth_event.dart';
-import '../blocs/auth/auth_state.dart';
+import 'package:projet_esgix/blocs/auth/auth_bloc.dart';
+import 'package:projet_esgix/blocs/auth/auth_event.dart';
+import 'package:projet_esgix/blocs/auth/auth_state.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
