@@ -9,7 +9,7 @@ import 'package:projet_esgix/widgets/post_card.dart';
 import 'package:projet_esgix/blocs/auth/auth_bloc.dart';
 import 'package:projet_esgix/models/post_model.dart';
 import 'package:projet_esgix/repositories/post_repository.dart';
-import 'create_post_screen.dart';
+import 'create_or_edit_post_screen.dart';
 import 'login_screen.dart';
 
 class HomeScreen extends StatefulWidget {

@@ -1,26 +1,26 @@
 class Post {
- final String id;
+ final String? id;
  final String? idParent;
- final Author author;
- final DateTime createdAt;
+ final Author? author;
+ final DateTime? createdAt;
  DateTime? updatedAt;
  final String? imageUrl;
  String content;
- int likesCount;
- int commentsCount;
- bool likedByUser;
+ int? likesCount;
+ int? commentsCount;
+ bool? likedByUser;
 
  Post({
-  required this.id,
+  this.id,
   this.idParent,
-  required this.author,
+  this.author,
   required this.content,
-  required this.createdAt,
+  this.createdAt,
   this.updatedAt,
   this.imageUrl,
-  required this.commentsCount,
-  required this.likesCount,
-  required this.likedByUser,
+  this.commentsCount,
+  this.likesCount,
+  this.likedByUser,
  });
 
  factory Post.fromJson(Map<String, dynamic> json) {
@@ -42,9 +42,9 @@ class Post {
   return {
    'id': id,
    'parent': idParent,
-   'author': author.toJson(),
+   'author': author?.toJson(),
    'content': content,
-   'createdAt': createdAt.toIso8601String(),
+   'createdAt': createdAt?.toIso8601String(),
    'updatedAt': updatedAt?.toIso8601String(),
    'imageUrl': imageUrl,
    'commentsCount': commentsCount,
@@ -52,6 +52,14 @@ class Post {
    'likedByUser': likedByUser,
   };
  }
+
+  Post copyWith({required String content, String? id, String? imageUrl}) {
+   return Post(
+    id: id,
+    content: content,
+    imageUrl: imageUrl,
+   );
+  }
 }
 
 class Author {

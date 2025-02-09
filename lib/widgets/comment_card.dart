@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:projet_esgix/screens/create_post_screen.dart';
+import 'package:projet_esgix/screens/create_or_edit_post_screen.dart';
 import '../models/comment_model.dart';
 import '../models/auth_user_model.dart';
 import '../repositories/post_repository.dart';

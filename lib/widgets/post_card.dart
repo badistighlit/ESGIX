@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:projet_esgix/blocs/post/post_bloc.dart';
 import 'package:projet_esgix/blocs/post_list/post_list_bloc.dart';
-import 'package:projet_esgix/screens/create_post_screen.dart';
+import 'package:projet_esgix/blocs/post_modifier/post_modifier_bloc.dart';
+import 'package:projet_esgix/screens/create_or_edit_post_screen.dart';
 import 'package:projet_esgix/models/auth_user_model.dart';
 import 'package:projet_esgix/models/post_model.dart';
 import 'package:projet_esgix/repositories/post_repository.dart';
+import 'package:projet_esgix/services/api_service.dat.dart';
 
 class PostCard extends StatefulWidget {
   final Post post;
@@ -33,7 +35,7 @@ class _PostCardState extends State<PostCard> {
   @override
   void initState() {
     super.initState();
-    _likedByUser = widget.post.likedByUser;
+    _likedByUser = widget.post.likedByUser!;
   }
 
   @override
@@ -59,26 +61,26 @@ class _PostCardState extends State<PostCard> {
                       Row(
                         children: [
                           CircleAvatar(
-                            backgroundImage: widget.post.author.avatar !=
-                                null && widget.post.author.avatar!.isNotEmpty
-                                ? NetworkImage(widget.post.author.avatar!)
+                            backgroundImage: widget.post.author!.avatar !=
+                                null && widget.post.author!.avatar!.isNotEmpty
+                                ? NetworkImage(widget.post.author!.avatar!)
                                 : const AssetImage(
                                 'lib/assets/default_avatar.png') as ImageProvider,
                             radius: 20,
                           ),
                           const SizedBox(width: 10),
                           Text(
-                            widget.post.author.username,
+                            widget.post.author!.username,
                             style: const TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 16),
                           ),
                         ],
                       ),
-                      if (widget.post.author.id == AuthUser.id)
+                      if (widget.post.author!.id == AuthUser.id)
                         GestureDetector(
                           onTapDown: (TapDownDetails details) {
                             _toggleParams(context, details.globalPosition,
-                                widget.post.id);
+                                widget.post.id!);
                           },
                           child: Icon(Icons.settings),
                         ),
@@ -105,7 +107,7 @@ class _PostCardState extends State<PostCard> {
                               Icons.favorite,
                               color: _likedByUser ? Colors.red : Colors.grey,
                             ),
-                            onPressed: () => _toggleLike(context, widget.post.id),
+                            onPressed: () => _toggleLike(context, widget.post.id!),
                           ),
                           Text(widget.post.likesCount == 1 ? '${widget.post
                               .likesCount} like' : '${widget.post
@@ -127,40 +129,49 @@ class _PostCardState extends State<PostCard> {
   }
 
   void _toggleParams(BuildContext context, Offset offset, String idPost) {
+    final menuContext = Navigator.of(context).context;
+
+    final items = [
+      PopupMenuItem(
+        value: 'edit',
+        child: Row(
+          children: const [
+            Icon(Icons.edit, color: Colors.blue),
+            SizedBox(width: 8),
+            Text('Edit'),
+          ],
+        ),
+      ),
+      PopupMenuItem(
+        value: 'delete',
+        child: Row(
+          children: const [
+            Icon(Icons.delete, color: Colors.red),
+            SizedBox(width: 8),
+            Text('Delete'),
+          ],
+        ),
+      ),
+    ];
+
+    final createPostScreen = BlocProvider<PostModifierBloc>(
+      create: (context) => PostModifierBloc(repository: PostRepository(apiService: ApiService.instance!)),
+      child: CreatePostScreen(
+        postRepository: widget.postRepository,
+        post: widget.post,
+      ),
+    );
+
     showMenu(
-      context: context,
+      context: menuContext,
       position: RelativeRect.fromLTRB(offset.dx, offset.dy, offset.dx + 1, offset.dy + 1),
-      items: [
-        PopupMenuItem(
-          value: 'edit',
-          child: Row(
-            children: const [
-              Icon(Icons.edit, color: Colors.blue),
-              SizedBox(width: 8),
-              Text('Edit'),
-            ],
-          ),
-        ),
-        PopupMenuItem(
-          value: 'delete',
-          child: Row(
-            children: const [
-              Icon(Icons.delete, color: Colors.red),
-              SizedBox(width: 8),
-              Text('Delete'),
-            ],
-          ),
-        ),
-      ],
+      items: items,
     ).then((value) async {
       if (value == 'edit' && context.mounted) {
         final edited = await Navigator.push(
-          context,
+          menuContext,
           MaterialPageRoute(
-            builder: (context) => CreatePostScreen(
-              postRepository: widget.postRepository,
-              idPost: idPost,
-            ),
+            builder: (context) => createPostScreen
           ),
         );
         if (edited == true && widget.onPostDeleted != null && context.mounted) {
@@ -179,9 +190,9 @@ class _PostCardState extends State<PostCard> {
       setState(() {
         _likedByUser = !_likedByUser;
         if (_likedByUser) {
-          widget.post.likesCount++;
+          widget.post.likesCount = widget.post.likesCount! + 1;
         } else {
-          widget.post.likesCount--;
+          widget.post.likesCount = widget.post.likesCount! - 1;
         }
       });
     } catch (e) {
