@@ -90,7 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, state) {
-          if (state is AuthSuccess) {
+          if (state.status == AuthStatus.success) {
             return FutureBuilder<List<Post>>(
               future: _postsFuture,
               builder: (context, snapshot) {

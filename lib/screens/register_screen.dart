@@ -35,17 +35,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ),
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state is AuthSuccess) {
+          if (state.status == AuthStatus.success) {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (_) => HomeScreen()),
             );
-          } else if (state is RegisterFailure) {
+          } else if (state.status == AuthStatus.registerFailure) {
             showDialog(
               context: context,
               builder: (_) => AlertDialog(
                 title: Text('Erreur d\'enregistrement'),
-                content: Text(state.error),
+                content: Text(state.error ?? "Error in registration"),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),

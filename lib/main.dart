@@ -51,15 +51,28 @@ class _MyAppState extends State<MyApp> {
           return MaterialApp(
             title: 'Projet Esgix',
             theme: ThemeData(primarySwatch: Colors.blue),
-            home: state is AuthSuccess
-                  ?
-                  //   BlocProvider(
-                  //   create: (context) => UserBloc(repository: UserRepository(ApiService.instance!)),
-                  //   child: UserProfileScreen(userId: AuthUser.id!),
-                  // )
-                  HomeScreen()
-                  : LoginScreen(),
+            home: _redirectToScreen(state)
+
+          //   state is AuthSuccess
+          //         ?
+          //           BlocProvider(
+          //           create: (context) => UserBloc(repository: UserRepository(ApiService.instance!)),
+          //           child: UserProfileScreen(userId: AuthUser.id!),
+          //         )
+          //         HomeScreen()
+          //         : LoginScreen(),
           );
     });
+  }
+
+  Widget _redirectToScreen(AuthState state) {
+    if (state.status == AuthStatus.success) {
+      return HomeScreen();
+    }
+
+    return BlocProvider(
+        create: (context) => AuthBloc(widget.authRepository),
+        child: LoginScreen()
+    );
   }
 }
