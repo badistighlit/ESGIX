@@ -212,12 +212,12 @@ class ApiService {
   Future<Map<String, dynamic>> fetchUserPosts(String userId, {bool liked = false, int page = 0, int offset = 0}) async {
     try {
       final response = await _httpClient.get(
-        '/user/$userId/${liked ? 'likes' : 'posts'}',
-        options: Options(headers: _getHeaders()),
-        queryParameters: {
-          'page': page,
-          'offset': offset,
-        }
+          '/user/$userId/${liked ? 'likes' : 'posts'}',
+          options: Options(headers: _getHeaders()),
+          queryParameters: {
+            'page': page,
+            'offset': offset,
+          }
       );
 
       if (response.statusCode == 200) {
@@ -228,6 +228,7 @@ class ApiService {
     } catch (e) {
       throw Exception("Error fetching posts for user: ${e.toString()}");
     }
+  }
 
   Future<void> deletePostById(String idPost) async {
     try {
