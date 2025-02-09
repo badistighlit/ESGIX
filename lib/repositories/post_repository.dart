@@ -19,7 +19,6 @@ class PostRepository {
     }
   }
 
-
   Future<List<CommentModel>> getComments(String idParent) async {
     try {
       final postsJson = await apiService.fetchComments(idParent);
