@@ -37,9 +37,8 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       final post = await widget.postRepository.getPostById(widget.idPost!);
       setState(() {
         _contentController.text = post.content;
-        if (post.imageUrl != null) {
-          _imageUrlController.text = post.imageUrl!;
-        }
+        // Si imageUrl est ' ', c'est qu'il n'y a pas d'image
+        _imageUrlController.text = post.imageUrl == ' ' ? '' : (post.imageUrl ?? '');
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -61,18 +60,18 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
     try {
       bool success;
+      final String? imageUrl = _imageUrlController.text.isEmpty ? ' ' : _imageUrlController.text;
+
       if (widget.idPost != null) {
-        // Mode édition
         success = await widget.postRepository.updatePost(
           widget.idPost!,
           _contentController.text,
-          _imageUrlController.text.isNotEmpty ? _imageUrlController.text : null,
+          imageUrl,
         );
       } else {
-        // Mode création
         success = await widget.postRepository.createPost(
           _contentController.text,
-          _imageUrlController.text.isNotEmpty ? _imageUrlController.text : null,
+          imageUrl,
         );
       }
 

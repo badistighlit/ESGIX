@@ -185,7 +185,7 @@ class _PostCardState extends State<PostCard> {
               ),
               const SizedBox(height: 8.0),
               Text(widget.post.content),
-              if (widget.post.imageUrl != null && widget.post.imageUrl!.isNotEmpty)
+              if (widget.post.imageUrl != null && widget.post.imageUrl != ' ' && widget.post.imageUrl!.isNotEmpty)
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: Image.network(widget.post.imageUrl!),
