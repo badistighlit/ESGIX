@@ -7,8 +7,17 @@ class PostList extends StatelessWidget {
   final List<Post> posts;
   final bool isLoading;
   final PostRepository postRepository;
+  final Function? onPostDeleted;
+  final Function? backFromDetails;
 
-  const PostList({Key? key, required this.posts, required this.postRepository, this.isLoading = false}) : super(key: key);
+  const PostList({
+    Key? key,
+    required this.posts,
+    required this.postRepository,
+    this.onPostDeleted,
+    this.backFromDetails,
+    this.isLoading = false,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +36,8 @@ class PostList extends StatelessWidget {
         return PostCard(
           post: posts[index],
           postRepository: postRepository,
+          onPostDeleted: onPostDeleted,
+          backFromDetails : backFromDetails
         );
       },
     );

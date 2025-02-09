@@ -36,13 +36,19 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     });
   }
 
+  void _reloadComments() {
+    setState(() {
+      _commentsFuture = _postRepository.getComments(widget.postId);
+    });
+  }
+
   Future<void> _submitComment() async {
     final content = _commentController.text.trim();
     final imageUrl = _imageUrlController.text.trim().isNotEmpty ? _imageUrlController.text.trim() : null;
 
     if (content.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Le commentaire ne peut pas être vide.")),
+        const SnackBar(content: Text("Le commentaire ne peut pas être vide.")),
       );
       return;
     }
@@ -52,9 +58,9 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       if (success) {
         _commentController.clear();
         _imageUrlController.clear();
-        _loadPostAndComments();
+        _reloadComments();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Commentaire ajouté avec succès !")),
+          const SnackBar(content: Text("Commentaire ajouté avec succès !")),
         );
       }
     } catch (e) {
@@ -66,77 +72,95 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Post Details')),
-      body: FutureBuilder<Post>(
-        future: _postFuture,
-        builder: (context, postSnapshot) {
-          if (postSnapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
-          if (postSnapshot.hasError) {
-            return Center(child: Text('Error: ${postSnapshot.error}'));
-          }
+    return WillPopScope(
+      onWillPop: () async {
+        Navigator.pop(context, true);
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Post Details'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.change_circle_rounded),
+              onPressed: _reloadComments,
+            ),
+          ],
+        ),
+        body: FutureBuilder<Post>(
+          future: _postFuture,
+          builder: (context, postSnapshot) {
+            if (postSnapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (postSnapshot.hasError) {
+              return Center(child: Text('Error: ${postSnapshot.error}'));
+            }
 
-          final post = postSnapshot.data!;
+            final post = postSnapshot.data!;
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              PostCard(post: post, postRepository: _postRepository),
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                PostCard(post: post, postRepository: _postRepository),
 
-              Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  children: [
-                    TextField(
-                      controller: _commentController,
-                      decoration: InputDecoration(
-                        hintText: "Écrire un commentaire...",
-                        border: OutlineInputBorder(),
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    children: [
+                      TextField(
+                        controller: _commentController,
+                        decoration: const InputDecoration(
+                          hintText: "Écrire un commentaire...",
+                          border: OutlineInputBorder(),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _imageUrlController,
-                      decoration: InputDecoration(
-                        hintText: "Entrer l'URL d'une image (optionnel)",
-                        border: OutlineInputBorder(),
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: _imageUrlController,
+                        decoration: const InputDecoration(
+                          hintText: "Entrer l'URL d'une image (optionnel)",
+                          border: OutlineInputBorder(),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    ElevatedButton(
-                      onPressed: _submitComment,
-                      child: Text("Ajouter"),
-                    ),
-                  ],
+                      const SizedBox(height: 10),
+                      ElevatedButton(
+                        onPressed: _submitComment,
+                        child: const Text("Ajouter"),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
 
-              Expanded(
-                child: FutureBuilder<List<CommentModel>>(
-                  future: _commentsFuture,
-                  builder: (context, commentSnapshot) {
-                    if (commentSnapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
-                    }
-                    if (commentSnapshot.hasError) {
-                      return Center(child: Text('Error: ${commentSnapshot.error}'));
-                    }
+                Expanded(
+                  child: FutureBuilder<List<CommentModel>>(
+                    future: _commentsFuture,
+                    builder: (context, commentSnapshot) {
+                      if (commentSnapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      if (commentSnapshot.hasError) {
+                        return Center(child: Text('Error: ${commentSnapshot.error}'));
+                      }
 
-                    final comments = commentSnapshot.data ?? [];
+                      final comments = commentSnapshot.data ?? [];
 
-                    if (comments.isEmpty) {
-                      return Center(child: Text('Aucun commentaire.'));
-                    }
+                      if (comments.isEmpty) {
+                        return const Center(child: Text('Aucun commentaire.'));
+                      }
 
-                    return CommentList(comments: comments);
-                  },
+                      return CommentList(
+                        comments: comments,
+                        postRepository: _postRepository,
+                        onCommentDeleted: _reloadComments,
+                      );
+                    },
+                  ),
                 ),
-              ),
-            ],
-          );
-        },
+              ],
+            );
+          },
+        ),
       ),
     );
   }

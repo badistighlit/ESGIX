@@ -148,6 +148,27 @@ class ApiService {
       throw Exception("Creating post error: ${e.toString()}");
     }
   }
+
+  Future<bool> updatePost(String idPost, String content, String? imageUrl) async {
+    try {
+      final response = await _httpClient.put(
+        '/posts/$idPost',
+        options: Options(headers: _getHeaders()),
+        data: {
+          'content': content,
+          if (imageUrl != null) 'imageUrl': imageUrl,
+        },
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      throw Exception("Creating post error: ${e.toString()}");
+    }
+  }
+
   //comments
   Future<List<Map<String, dynamic>>> fetchComments(String idParent) async {
     try {
@@ -207,6 +228,24 @@ class ApiService {
     } catch (e) {
       throw Exception("Error fetching posts for user: ${e.toString()}");
     }
+
+  Future<void> deletePostById(String idPost) async {
+    try {
+      final response = await _httpClient.delete(
+        '/posts/$idPost',
+        options: Options(headers: _getHeaders()),
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 204) {
+        throw Exception('Failed to delete post: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('delete post error: ${e.toString()}');
+    }
+  }
+
+  void logout() {
+    AuthUser.clearCurrentInstance();
   }
 
   Map<String, String> _getHeaders() {
