@@ -9,6 +9,8 @@ class UserRepository implements UserRepositoryInterface {
 
   @override
   Future<User> getUserById(String id) async {
-    return apiService.getUserById(id);
+    final userData = await apiService.getUserById(id);
+
+    return User.fromJson(userData);
   }
 }

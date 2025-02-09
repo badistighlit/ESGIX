@@ -10,7 +10,6 @@ class Post {
  int commentsCount;
  bool likedByUser;
 
- // Constructeur
  Post({
   required this.id,
   this.idParent,
@@ -24,7 +23,6 @@ class Post {
   required this.likedByUser,
  });
 
- // Mapping de JSON en objet
  factory Post.fromJson(Map<String, dynamic> json) {
   return Post(
    id: json['id'] as String,
@@ -34,13 +32,12 @@ class Post {
    createdAt: DateTime.parse(json['createdAt'] as String),
    updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
    imageUrl: json['imageUrl'] as String?,
-   commentsCount: json['commentsCount'] as int,
+   commentsCount: json['commentsCount'] ?? 0,
    likesCount: json['likesCount'] as int,
-   likedByUser: json['likedByUser'] as bool,
+   likedByUser: json['likedByUser'] ?? false,
   );
  }
 
- // Mapping d'objet en JSON
  Map<String, dynamic> toJson() {
   return {
    'id': id,
@@ -62,14 +59,12 @@ class Author {
  final String username;
  final String? avatar;
 
- // Constructeur
  Author({
   required this.id,
   required this.username,
   this.avatar,
  });
 
- // Mapping de JSON en modèle
  factory Author.fromJson(Map<String, dynamic> json) {
   return Author(
    id: json['id'] as String,
@@ -78,7 +73,6 @@ class Author {
   );
  }
 
- // Mapping de modèle en JSON
  Map<String, dynamic> toJson() {
   return {
    'id': id,

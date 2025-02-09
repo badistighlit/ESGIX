@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:projet_esgix/screens/create_post_screen.dart';
 import '../models/auth_user_model.dart';
 import '../models/post_model.dart';
-import '../screens/CreatePostScreen.dart';
-import '../screens/post_detail_screen.dart';
 import '../repositories/post_repository.dart';
 import '../services/api_service.dat.dart';
 
