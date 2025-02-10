@@ -139,7 +139,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     return BlocBuilder<PostBloc, PostState>(builder: (context, state) {
       if (state.status == PostStatus.loading) {
         return const Center(child: CircularProgressIndicator());
-      } else if (state.status == PostStatus.loaded) {
+      } else if (state.status == PostStatus.loaded || state.status == PostStatus.liked) {
         return PostCard(post: state.post!,);
       }
       return Center(child: Text("Erreur : Error loading post with state ${state.status}"));

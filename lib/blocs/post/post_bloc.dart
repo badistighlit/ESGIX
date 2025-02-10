@@ -45,7 +45,9 @@ class PostBloc extends Bloc<PostEvent, PostState> {
       final liked = await repository.likePost(event.postId);
 
       if (liked) {
-        emit(PostState(status: PostStatus.liked));
+        final post = await repository.getPostById(event.postId);
+
+        emit(PostState(status: PostStatus.liked, post: post));
       }
     } catch (e) {
       emit(PostState(status: PostStatus.error, exception: AppException.from(e)));
