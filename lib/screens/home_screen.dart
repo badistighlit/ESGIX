@@ -5,6 +5,7 @@ import 'package:projet_esgix/blocs/comment_list/comment_list_bloc.dart';
 import 'package:projet_esgix/blocs/comment_modifier/comment_modifier_bloc.dart';
 import 'package:projet_esgix/blocs/post/post_bloc.dart';
 import 'package:projet_esgix/blocs/post_list/post_list_bloc.dart';
+import 'package:projet_esgix/blocs/post_modifier/post_modifier_bloc.dart';
 import 'package:projet_esgix/exceptions/global/app_exception.dart';
 import 'package:projet_esgix/screens/post_detail_screen.dart';
 import 'package:projet_esgix/services/api_service.dat.dart';
@@ -44,7 +45,13 @@ class _HomeScreenState extends State<HomeScreen> {
   void _navigateToCreatePostScreen() async {
     final bool? postCreated = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => CreatePostScreen(postRepository: context.read<PostRepository>())),
+      MaterialPageRoute(builder: (context) => RepositoryProvider(
+        create: (context) => PostRepository(apiService: ApiService.instance!),
+        child: BlocProvider<PostModifierBloc>(
+          create: (context) => PostModifierBloc(repository: context.read<PostRepository>()),
+          child: CreatePostScreen()),
+      )
+      ),
     );
 
     if (postCreated == true) {

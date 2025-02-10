@@ -153,7 +153,6 @@ class _PostCardState extends State<PostCard> {
       child: BlocProvider<PostModifierBloc>(
         create: (context) => PostModifierBloc(repository: context.read<PostRepository>()),
         child: CreatePostScreen(
-          postRepository: context.read<PostRepository>(),
           post: widget.post,
         ),
       ),
@@ -219,9 +218,6 @@ class _PostCardState extends State<PostCard> {
                       SnackBar(content: Text('Post supprimé'))
                   );
                   Navigator.of(dialogContext).pop();
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    context.read<PostListBloc>().add(GetAllPosts());
-                  });
                 } else if (state.status == PostStatus.error) {
                   ScaffoldMessenger.of(dialogContext).showSnackBar(
                       SnackBar(content: Text('Erreur lors de la suppression: ${state.exception.toString()}'))

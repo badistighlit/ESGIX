@@ -2,14 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:projet_esgix/blocs/post_modifier/post_modifier_bloc.dart';
 import 'package:projet_esgix/models/post_model.dart';
-import 'package:projet_esgix/repositories/post_repository.dart';
 
 class CreatePostScreen extends StatefulWidget {
-  final PostRepository postRepository;
   final String? idPost;
   final Post? post;
 
-  const CreatePostScreen({super.key, required this.postRepository, this.idPost, this.post});
+  const CreatePostScreen({super.key, this.idPost, this.post});
 
   @override
   _CreatePostScreenState createState() => _CreatePostScreenState();
