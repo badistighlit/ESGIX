@@ -13,17 +13,13 @@ import 'package:projet_esgix/services/api_service.dat.dart';
 
 class PostCard extends StatefulWidget {
   final Post post;
-  final PostRepository postRepository;
-  final Function? onPostDeleted;
-  final Function? backFromDetails;
+  final Function? postDetailsNavigator;
 
   const PostCard({
-    Key? key,
+    super.key,
     required this.post,
-    required this.postRepository,
-    this.onPostDeleted,
-    this.backFromDetails,
-  }) : super(key: key);
+    this.postDetailsNavigator,
+  });
 
   @override
   _PostCardState createState() => _PostCardState();
@@ -44,8 +40,8 @@ class _PostCardState extends State<PostCard> {
       builder: (context, state) {
         return GestureDetector(
           onTap: () async {
-            if (widget.backFromDetails != null) {
-              widget.backFromDetails!(widget.post.id);
+            if (widget.postDetailsNavigator != null) {
+              widget.postDetailsNavigator!(widget.post.id);
             }
           },
           child: Card(
@@ -177,7 +173,7 @@ class _PostCardState extends State<PostCard> {
             builder: (context) => createPostScreen
           ),
         );
-        if (edited == true && widget.onPostDeleted != null && context.mounted) {
+        if (edited == true && context.mounted) {
           context.read<PostBloc>().add(GetPost(idPost));
         }
       } else if (value == 'delete' && context.mounted) {

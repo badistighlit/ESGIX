@@ -10,11 +10,11 @@ class CommentCard extends StatefulWidget {
   final Function? onCommentDeleted;
 
   const CommentCard({
-    Key? key,
+    super.key,
     required this.comment,
     required this.postRepository,
     this.onCommentDeleted,
-  }) : super(key: key);
+  });
 
   @override
   _CommentCardState createState() => _CommentCardState();

@@ -2,7 +2,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:projet_esgix/exceptions/global/app_exception.dart';
 import 'package:projet_esgix/models/comment_model.dart';
-import 'package:projet_esgix/models/post_model.dart';
 import 'package:projet_esgix/repositories/post_repository.dart';
 
 part 'comment_modifier_event.dart';

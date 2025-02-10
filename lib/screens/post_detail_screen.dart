@@ -13,7 +13,7 @@ import 'package:projet_esgix/widgets/post_card.dart';
 class PostDetailScreen extends StatefulWidget {
   final String postId;
 
-  const PostDetailScreen({Key? key, required this.postId}) : super(key: key);
+  const PostDetailScreen({super.key, required this.postId});
 
   @override
   _PostDetailScreenState createState() => _PostDetailScreenState();
@@ -140,7 +140,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       if (state.status == PostStatus.loading) {
         return const Center(child: CircularProgressIndicator());
       } else if (state.status == PostStatus.loaded) {
-        return PostCard(post: state.post!, postRepository: PostRepository(apiService: ApiService.instance!));
+        return PostCard(post: state.post!,);
       }
       return Center(child: Text("Erreur : Error loading post with state ${state.status}"));
     });

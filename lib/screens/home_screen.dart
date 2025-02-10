@@ -120,9 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
         create: (context) => PostBloc(repository: context.read<PostRepository>()),
         child: PostCard(
             post: posts[index],
-            postRepository: context.read<PostRepository>(),
-            onPostDeleted: _reloadPosts,
-            backFromDetails : _navigateToPostDetailScreen
+            postDetailsNavigator : _navigateToPostDetailScreen
         ),
       );
     },
