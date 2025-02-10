@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:projet_esgix/blocs/auth/auth_event.dart';
+import 'package:projet_esgix/blocs/comment_list/comment_list_bloc.dart';
+import 'package:projet_esgix/blocs/comment_modifier/comment_modifier_bloc.dart';
+import 'package:projet_esgix/blocs/post/post_bloc.dart';
+import 'package:projet_esgix/blocs/post_list/post_list_bloc.dart';
+import 'package:projet_esgix/blocs/post_modifier/post_modifier_bloc.dart';
+import 'package:projet_esgix/exceptions/global/app_exception.dart';
 import 'package:projet_esgix/screens/post_detail_screen.dart';
-import '../blocs/auth/auth_bloc.dart';
-import '../blocs/auth/auth_state.dart';
-import '../models/post_model.dart';
-import '../repositories/post_repository.dart';
-import '../services/api_service.dat.dart';
-import '../widgets/post_list_screen.dart';
-import 'create_post_screen.dart';
+import 'package:projet_esgix/services/api_service.dat.dart';
+import 'package:projet_esgix/widgets/post_card.dart';
+import 'package:projet_esgix/blocs/auth/auth_bloc.dart';
+import 'package:projet_esgix/models/post_model.dart';
+import 'package:projet_esgix/repositories/post_repository.dart';
+import 'create_or_edit_post_screen.dart';
 import 'login_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -19,15 +24,12 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late PostRepository postRepository;
-  late Future<List<Post>> _postsFuture;
 
   @override
   void initState() {
     super.initState();
-    final apiService = ApiService(baseUrl: 'https://esgix.tech');
-    postRepository = PostRepository(apiService: apiService);
-    _postsFuture = postRepository.getPosts();
+
+    _fetchAllPosts();
   }
 
   void _logout(BuildContext context) {
@@ -43,33 +45,20 @@ class _HomeScreenState extends State<HomeScreen> {
   void _navigateToCreatePostScreen() async {
     final bool? postCreated = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => CreatePostScreen(postRepository: postRepository)),
+      MaterialPageRoute(builder: (context) => RepositoryProvider(
+        create: (context) => PostRepository(apiService: ApiService.instance!),
+        child: BlocProvider<PostModifierBloc>(
+          create: (context) => PostModifierBloc(repository: context.read<PostRepository>()),
+          child: CreatePostScreen()),
+      )
+      ),
     );
 
     if (postCreated == true) {
       setState(() {
-        _postsFuture = postRepository.getPosts();
+        _fetchAllPosts();
       });
     }
-  }
-
-  void _navigateToPostDetailScreen(String postId) async {
-    final bool? postUpdated = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PostDetailScreen(postId: postId),
-      ),
-    );
-
-    if (postUpdated == true) {
-      _reloadPosts();
-    }
-  }
-
-  void _reloadPosts() {
-    setState(() {
-      _postsFuture = postRepository.getPosts();
-    });
   }
 
   @override
@@ -88,31 +77,14 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: BlocBuilder<AuthBloc, AuthState>(
+      body: BlocBuilder<PostListBloc, PostListState>(
         builder: (context, state) {
-          if (state is AuthSuccess) {
-            return FutureBuilder<List<Post>>(
-              future: _postsFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text("Erreur : ${snapshot.error}"));
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text("Aucun post disponible."));
-                } else {
-                  return PostList(
-                      posts: snapshot.data!,
-                      postRepository: postRepository,
-                      onPostDeleted: _reloadPosts,
-                      backFromDetails: _navigateToPostDetailScreen
-                  );
-                }
-              },
-            );
-          } else {
-            return const Center(child: Text("Vous n'êtes pas connecté."));
-          }
+          return switch (state.status) {
+            PostListStatus.loading => _showLoading(),
+            PostListStatus.success => _showSuccess(state.posts),
+            PostListStatus.failure => _showFailure(state.exception!),
+            PostListStatus.empty => _showEmpty()
+          };
         },
       ),
       floatingActionButton: FloatingActionButton(
@@ -143,5 +115,52 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  Widget _showLoading() => const Center(child: CircularProgressIndicator());
+
+  Widget _showSuccess(List<Post> posts) => ListView.builder(
+    padding: const EdgeInsets.all(8.0),
+    itemCount: posts.length,
+    itemBuilder: (context, index) {
+      return BlocProvider<PostBloc>(
+        create: (context) => PostBloc(repository: context.read<PostRepository>()),
+        child: PostCard(
+            post: posts[index],
+            postDetailsNavigator : _navigateToPostDetailScreen
+        ),
+      );
+    },
+  );
+
+  Widget _showFailure(AppException error) => Center(child: Text("Erreur : $error"));
+
+  Widget _showEmpty() => const Center(child: Text("Aucun post disponible."));
+
+  void _fetchAllPosts() => context.read<PostListBloc>().add(GetAllPosts());
+
+  void _reloadPosts() => _fetchAllPosts();
+
+  void _navigateToPostDetailScreen(String postId) async {
+    final bool? postUpdated = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RepositoryProvider<PostRepository>(
+          create: (context) => PostRepository(apiService: ApiService.instance!),
+          child: MultiBlocProvider(
+              providers: [
+                BlocProvider(create: (context) => CommentListBloc(repository: context.read<PostRepository>())),
+                BlocProvider(create: (context) => PostBloc(repository: context.read<PostRepository>())),
+                BlocProvider(create: (context) => CommentModifierBloc(repository: context.read<PostRepository>())),
+              ],
+              child: PostDetailScreen(postId: postId)
+          ),
+        ),
+      ),
+    );
+
+    if (postUpdated == true) {
+      _reloadPosts();
+    }
   }
 }

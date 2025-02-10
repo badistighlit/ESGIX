@@ -19,7 +19,6 @@ class PostRepository {
     }
   }
 
-
   Future<List<CommentModel>> getComments(String idParent) async {
     try {
       final postsJson = await apiService.fetchComments(idParent);
@@ -51,7 +50,7 @@ Future<bool> createPost(String content, String? imageUrl) async {
   {  throw Exception('Failed to create post : $e');}
 }
 
-  Future<bool> updatePost (String idPost, String content, String? imageUrl) async {
+  Future<bool> updatePost(String idPost, String content, String? imageUrl) async {
     try {
       final response = await apiService.updatePost(idPost, content, imageUrl);
       return response;
@@ -60,7 +59,7 @@ Future<bool> createPost(String content, String? imageUrl) async {
     {  throw Exception('Failed to update post : $e');}
   }
 
-Future <bool> likePost (String idPost) async {
+Future <bool> likePost(String idPost) async {
     try {
       final response = await apiService.likePost(idPost);
       return response;
@@ -70,9 +69,9 @@ Future <bool> likePost (String idPost) async {
 }
 
 
-  Future<bool> createComment(String content, String? imageUrl, String idParent) async {
+  Future<bool> createComment(CommentModel comment) async {
     try {
-      final response = await apiService.createComment(content,imageUrl,idParent);
+      final response = await apiService.createComment(comment.content, comment.imageUrl, comment.idParent);
       return response;
     }
     catch(e)
@@ -96,6 +95,7 @@ Future <bool> likePost (String idPost) async {
   Future<bool> deletePostById(String idPost) async {
     try {
       await apiService.deletePostById(idPost);
+
       return true;
     } catch (e) {
       throw Exception('Failed to delete post by ID: $e');

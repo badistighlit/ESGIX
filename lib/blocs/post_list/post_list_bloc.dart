@@ -15,6 +15,7 @@ class PostListBloc extends Bloc<PostListEvent, PostListState> {
   }
 
   Future<void> _onGetAllPosts(GetAllPosts event, Emitter<PostListState> emit) async {
+    emit(PostListState.copyWith(status: PostListStatus.loading));
     try {
       List<Post> posts = await repository.getPosts();
 
@@ -31,6 +32,7 @@ class PostListBloc extends Bloc<PostListEvent, PostListState> {
   }
 
   Future<void> _onGetUserPosts(GetUserPosts event, Emitter<PostListState> emit) async {
+    emit(PostListState.copyWith(status: PostListStatus.loading));
     try {
       List<Post> posts;
 

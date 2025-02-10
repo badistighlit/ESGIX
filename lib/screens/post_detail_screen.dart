@@ -1,25 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:projet_esgix/models/post_model.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:projet_esgix/blocs/comment_list/comment_list_bloc.dart';
+import 'package:projet_esgix/blocs/comment_modifier/comment_modifier_bloc.dart';
+import 'package:projet_esgix/blocs/post/post_bloc.dart';
+import 'package:projet_esgix/exceptions/global/app_exception.dart';
 import 'package:projet_esgix/models/comment_model.dart';
 import 'package:projet_esgix/repositories/post_repository.dart';
-import '../services/api_service.dat.dart';
-import '../widgets/comment_list.dart';
-import '../widgets/post_card.dart';
+import 'package:projet_esgix/widgets/comment_card.dart';
+import 'package:projet_esgix/services/api_service.dat.dart';
+import 'package:projet_esgix/widgets/post_card.dart';
 
 class PostDetailScreen extends StatefulWidget {
   final String postId;
 
-  const PostDetailScreen({Key? key, required this.postId}) : super(key: key);
+  const PostDetailScreen({super.key, required this.postId});
 
   @override
   _PostDetailScreenState createState() => _PostDetailScreenState();
 }
 
 class _PostDetailScreenState extends State<PostDetailScreen> {
-  late Future<Post> _postFuture;
-  late Future<List<CommentModel>> _commentsFuture;
-  final PostRepository _postRepository = PostRepository(apiService: ApiService(baseUrl: 'https://esgix.tech'));
-
   final TextEditingController _commentController = TextEditingController();
   final TextEditingController _imageUrlController = TextEditingController();
 
@@ -30,45 +30,13 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   }
 
   void _loadPostAndComments() {
-    setState(() {
-      _postFuture = _postRepository.getPostById(widget.postId);
-      _commentsFuture = _postRepository.getComments(widget.postId);
-    });
+    _loadAllPosts();
+    _loadAllComments();
   }
 
-  void _reloadComments() {
-    setState(() {
-      _commentsFuture = _postRepository.getComments(widget.postId);
-    });
-  }
+  void _loadAllPosts() => context.read<PostBloc>().add(GetPost(widget.postId));
 
-  Future<void> _submitComment() async {
-    final content = _commentController.text.trim();
-    final imageUrl = _imageUrlController.text.trim().isNotEmpty ? _imageUrlController.text.trim() : null;
-
-    if (content.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Le commentaire ne peut pas être vide.")),
-      );
-      return;
-    }
-
-    try {
-      final success = await _postRepository.createComment(content, imageUrl, widget.postId);
-      if (success) {
-        _commentController.clear();
-        _imageUrlController.clear();
-        _reloadComments();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Commentaire ajouté avec succès !")),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Erreur : $e")),
-      );
-    }
-  }
+  void _loadAllComments() => context.read<CommentListBloc>().add(GetAllComments(parentPostId: widget.postId));
 
   @override
   Widget build(BuildContext context) {
@@ -83,27 +51,14 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           actions: [
             IconButton(
               icon: const Icon(Icons.change_circle_rounded),
-              onPressed: _reloadComments,
+              onPressed: _loadAllComments,
             ),
           ],
         ),
-        body: FutureBuilder<Post>(
-          future: _postFuture,
-          builder: (context, postSnapshot) {
-            if (postSnapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (postSnapshot.hasError) {
-              return Center(child: Text('Error: ${postSnapshot.error}'));
-            }
-
-            final post = postSnapshot.data!;
-
-            return Column(
+        body: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                PostCard(post: post, postRepository: _postRepository),
-
+                _buildPostCard(context),
                 Padding(
                   padding: const EdgeInsets.all(12.0),
                   child: Column(
@@ -124,44 +79,92 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                         ),
                       ),
                       const SizedBox(height: 10),
-                      ElevatedButton(
-                        onPressed: _submitComment,
-                        child: const Text("Ajouter"),
+                      BlocConsumer<CommentModifierBloc, CommentModifierState>(
+                        listener: _onModifierCommentBlocListener,
+                        builder: (context, state) {
+                          return ElevatedButton(
+                            onPressed: () => _onValidate(context),
+                            child: const Text("Ajouter"),
+                          );
+                        },
                       ),
                     ],
                   ),
                 ),
 
                 Expanded(
-                  child: FutureBuilder<List<CommentModel>>(
-                    future: _commentsFuture,
-                    builder: (context, commentSnapshot) {
-                      if (commentSnapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                      if (commentSnapshot.hasError) {
-                        return Center(child: Text('Error: ${commentSnapshot.error}'));
-                      }
-
-                      final comments = commentSnapshot.data ?? [];
-
-                      if (comments.isEmpty) {
-                        return const Center(child: Text('Aucun commentaire.'));
-                      }
-
-                      return CommentList(
-                        comments: comments,
-                        postRepository: _postRepository,
-                        onCommentDeleted: _reloadComments,
-                      );
+                  child: BlocBuilder<CommentListBloc, CommentListState>(
+                    builder: (context, state) {
+                      return switch (state.status) {
+                        CommentListStatus.loading => _showLoading(),
+                        CommentListStatus.success => _showSuccess(state.comments, _loadAllComments),
+                        CommentListStatus.failure => _showFailure(state.exception!),
+                        CommentListStatus.empty => _showEmpty(),
+                      };
                     },
                   ),
                 ),
-              ],
-            );
-          },
-        ),
-      ),
-    );
+            ],
+          ),
+        ));
+      }
+
+
+  void _onValidate(BuildContext context) {
+    final content = _commentController.text.trim();
+    final imageUrl = _imageUrlController.text.trim().isNotEmpty ? _imageUrlController.text.trim() : null;
+
+    final comment = CommentModel.copyWith(parentId: widget.postId, content: content, imageUrl: imageUrl);
+
+    context.read<CommentModifierBloc>().add(CreateComment(comment));
   }
+
+  void _onModifierCommentBlocListener(
+      BuildContext context,
+      CommentModifierState state,
+      ) {
+    final message = switch (state.status) {
+      CommentModifierStatus.successAddingComment => 'Commentaire ajouté avec succès',
+      CommentModifierStatus.errorAddingComment => 'Erreur lors de l\'ajout du commentaire : ${state.exception}',
+      _ => null,
+    };
+
+    if (message == null) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(message),
+    ));
+  }
+
+  Widget _buildPostCard(BuildContext context) {
+    return BlocBuilder<PostBloc, PostState>(builder: (context, state) {
+      if (state.status == PostStatus.loading) {
+        return const Center(child: CircularProgressIndicator());
+      } else if (state.status == PostStatus.loaded) {
+        return PostCard(post: state.post!,);
+      }
+      return Center(child: Text("Erreur : Error loading post with state ${state.status}"));
+    });
+  }
+
+  Widget _showLoading() => const Center(child: CircularProgressIndicator());
+
+  Widget _showSuccess(List<CommentModel> comments, Function? _loadAllComments) => ListView.builder(
+    itemCount: comments.length,
+    itemBuilder: (context, index) {
+      final comment = comments[index];
+      return RepositoryProvider(
+        create: (context) => PostRepository(apiService: ApiService.instance!),
+        child: BlocProvider<CommentModifierBloc>(
+          create: (context) => CommentModifierBloc(repository: context.read<PostRepository>()),
+          child: CommentCard(
+            comment: comment,
+          ),
+        ),
+      );
+    },
+  );
+
+  Widget _showFailure(AppException error) => Center(child: Text("Erreur : $error"));
+
+  Widget _showEmpty() => const Center(child: Text("Aucun commentaire disponible."));
 }

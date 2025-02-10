@@ -6,7 +6,7 @@ import 'auth_state.dart';
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthRepository authRepository;
 
-  AuthBloc(this.authRepository): super (const AuthState()) {
+  AuthBloc(this.authRepository): super (const AuthState(status: AuthStatus.loadingCurrentUser)) {
     on<AppStarted>(_loadCurrentUser);
     on<Login>(_onLogin);
     on<Register>(_onRegister);
@@ -22,7 +22,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final bool loaded = await authRepository.loadCurrentUser();
 
     if (loaded) {
-      emit(AuthSuccess(AuthUser.username!));
+      emit(AuthState.copyWith(status: AuthStatus.success, username: AuthUser.username!));
+    } else {
+      emit(AuthState.copyWith(status: AuthStatus.currentUserNotLoaded));
     }
   }
 
@@ -30,9 +32,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       await authRepository.login(event.email, event.password);
 
-      emit(AuthSuccess(AuthUser.username!));
+      emit(AuthState.copyWith(status: AuthStatus.success, username: AuthUser.username!));
     } catch (e) {
-      emit(AuthFailure("Échec de la  connexion : ${e.toString()}"));
+      emit(AuthState(status: AuthStatus.loginFailure, error: "Échec de la  connexion : ${e.toString()}"));
     }
   }
 
@@ -40,9 +42,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       await authRepository.register(event.email, event.password, event.username, event.avatar);
 
-      emit(AuthSuccess(event.username));
+      emit(AuthState.copyWith(status: AuthStatus.success, username: event.username));
     } catch (e) {
-      emit(RegisterFailure(e.toString()));
+      emit(AuthState(status: AuthStatus.registerFailure, error: e.toString()));
     }
   }
 }

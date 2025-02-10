@@ -1,8 +1,19 @@
-abstract class PostEvent {}
+part of 'post_bloc.dart';
 
-class FetchPosts extends PostEvent {
-  final int page;
-  final int offset;
+sealed class PostEvent {
+  final String postId;
 
-  FetchPosts({this.page = 0, this.offset = 10});
+  PostEvent(this.postId);
+}
+
+class GetPost extends PostEvent {
+  GetPost(super.postId);
+}
+
+class DeletePost extends PostEvent {
+  DeletePost(super.postId);
+}
+
+class LikePost extends PostEvent {
+  LikePost(super.postId);
 }

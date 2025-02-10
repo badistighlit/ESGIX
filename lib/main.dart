@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:projet_esgix/blocs/auth/auth_event.dart';
 import 'package:projet_esgix/blocs/auth/auth_state.dart';
+import 'package:projet_esgix/blocs/post_list/post_list_bloc.dart';
 import 'package:projet_esgix/repositories/auth_repository.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:projet_esgix/repositories/post_repository.dart';
 import 'package:projet_esgix/screens/home_screen.dart';
 import 'package:projet_esgix/services/api_service.dat.dart';
 import 'blocs/auth/auth_bloc.dart';
@@ -51,15 +53,34 @@ class _MyAppState extends State<MyApp> {
           return MaterialApp(
             title: 'Projet Esgix',
             theme: ThemeData(primarySwatch: Colors.blue),
-            home: state is AuthSuccess
-                  ?
-                  //   BlocProvider(
-                  //   create: (context) => UserBloc(repository: UserRepository(ApiService.instance!)),
-                  //   child: UserProfileScreen(userId: AuthUser.id!),
-                  // )
-                  HomeScreen()
-                  : LoginScreen(),
+            home: _redirectToScreen(state)
+
+          //   state is AuthSuccess
+          //         ?
+          //           BlocProvider(
+          //           create: (context) => UserBloc(repository: UserRepository(ApiService.instance!)),
+          //           child: UserProfileScreen(userId: AuthUser.id!),
+          //         )
+          //         HomeScreen()
+          //         : LoginScreen(),
           );
     });
+  }
+
+  Widget _redirectToScreen(AuthState state) {
+    if (state.status == AuthStatus.success) {
+      return RepositoryProvider(
+        create: (context) => PostRepository(apiService: ApiService.instance!),
+        child: BlocProvider(
+          create: (context) => PostListBloc(repository: context.read<PostRepository>()),
+          child: HomeScreen(),
+        ),
+      );
+    }
+
+    return BlocProvider(
+        create: (context) => AuthBloc(widget.authRepository),
+        child: LoginScreen()
+    );
   }
 }

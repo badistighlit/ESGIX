@@ -1,19 +1,17 @@
-import '../../models/post_model.dart';
+part of 'post_bloc.dart';
 
-abstract class PostState {}
-
-class PostInitial extends PostState {}
-
-class PostLoading extends PostState {}
-
-class PostLoaded extends PostState {
-  final List<Post> posts;
-
-  PostLoaded(this.posts);
+enum PostStatus {
+  loading,
+  loaded,
+  deleted,
+  liked,
+  error,
 }
 
-class PostError extends PostState {
-  final String message;
+class PostState {
+  final PostStatus status;
+  final Post? post;
+  final AppException? exception;
 
-  PostError(this.message);
+  PostState({required this.status, this.post, this.exception});
 }
