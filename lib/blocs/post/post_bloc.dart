@@ -10,12 +10,13 @@ part 'post_state.dart';
 class PostBloc extends Bloc<PostEvent, PostState> {
   final PostRepository repository;
 
-  PostBloc({required this.repository}) : super(PostState(status: PostStatus.initial)) {
+  PostBloc({required this.repository}) : super(PostState(status: PostStatus.loading)) {
     on<GetPost>(_getPost);
     on<DeletePost>(_deletePost);
     on<LikePost>(_likePost);
   }
   void _getPost(GetPost event, Emitter<PostState> emit) async {
+    emit(PostState(status: PostStatus.loading));
     try {
       final post = await repository.getPostById(event.postId);
 
@@ -26,6 +27,7 @@ class PostBloc extends Bloc<PostEvent, PostState> {
   }
 
   void _deletePost(DeletePost event, Emitter<PostState> emit) async {
+    emit(PostState(status: PostStatus.loading));
     try {
       final deleted = await repository.deletePostById(event.postId);
 
@@ -38,6 +40,7 @@ class PostBloc extends Bloc<PostEvent, PostState> {
   }
 
   void _likePost(LikePost event, Emitter<PostState> emit) async {
+    emit(PostState(status: PostStatus.loading));
     try {
       final liked = await repository.likePost(event.postId);
 

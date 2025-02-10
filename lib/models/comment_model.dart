@@ -1,8 +1,8 @@
 class CommentModel {
   final String id;
   final String idParent;
-  final Author author;
-  final DateTime createdAt;
+  final Author? author;
+  final DateTime? createdAt;
   DateTime? updatedAt;
   final String ? imageUrl;
   String content;
@@ -10,19 +10,31 @@ class CommentModel {
   int commentsCount;
 
 
-//constructeur
-
   CommentModel({
     required this.id,
     required this.idParent,
-    required this.author,
+    this.author,
     required this.content,
-    required this.createdAt,
+    this.createdAt,
     this.updatedAt,
     this.imageUrl,
     required this.commentsCount,
     required this.likesCount,
   });
+
+  static CommentModel copyWith({required String parentId, required String content, String? imageUrl}) {
+    return CommentModel(
+      id: '',
+      idParent: parentId,
+      author: null,
+      content: content,
+      createdAt: null,
+      updatedAt: null,
+      imageUrl: imageUrl,
+      commentsCount: 0,
+      likesCount: 0,
+    );
+  }
 
 
   // Mapping de Json en objet
@@ -46,9 +58,9 @@ class CommentModel {
     return {
       'id': id,
       'parent': idParent,
-      'author': author.toJson(),
+      'author': author?.toJson(),
       'content': content,
-      'createdAt': createdAt.toIso8601String(),
+      'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
       'imageUrl': imageUrl,
       'commentsCount': commentsCount,

@@ -69,9 +69,9 @@ Future <bool> likePost(String idPost) async {
 }
 
 
-  Future<bool> createComment(String content, String? imageUrl, String idParent) async {
+  Future<bool> createComment(CommentModel comment) async {
     try {
-      final response = await apiService.createComment(content,imageUrl,idParent);
+      final response = await apiService.createComment(comment.content, comment.imageUrl, comment.idParent);
       return response;
     }
     catch(e)

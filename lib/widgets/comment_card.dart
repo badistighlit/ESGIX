@@ -119,19 +119,19 @@ class _CommentCardState extends State<CommentCard> {
                 Row(
                   children: [
                     CircleAvatar(
-                      backgroundImage: widget.comment.author.avatar != null && widget.comment.author.avatar!.isNotEmpty
-                          ? NetworkImage(widget.comment.author.avatar!)
+                      backgroundImage: widget.comment.author!.avatar != null && widget.comment.author!.avatar!.isNotEmpty
+                          ? NetworkImage(widget.comment.author!.avatar!)
                           : const AssetImage('lib/assets/default_avatar.png') as ImageProvider,
                       radius: 20,
                     ),
                     const SizedBox(width: 8.0),
                     Text(
-                      widget.comment.author.username,
+                      widget.comment.author!.username,
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
-                if (widget.comment.author.id == AuthUser.id)
+                if (widget.comment.author!.id == AuthUser.id)
                   GestureDetector(
                     onTapDown: (TapDownDetails details) {
                       _toggleParams(context, details.globalPosition, widget.comment.id);

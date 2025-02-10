@@ -154,11 +154,14 @@ class _PostCardState extends State<PostCard> {
       ),
     ];
 
-    final createPostScreen = BlocProvider<PostModifierBloc>(
-      create: (context) => PostModifierBloc(repository: PostRepository(apiService: ApiService.instance!)),
-      child: CreatePostScreen(
-        postRepository: widget.postRepository,
-        post: widget.post,
+    final createPostScreen = RepositoryProvider(
+      create: (context) => PostRepository(apiService: ApiService.instance!),
+      child: BlocProvider<PostModifierBloc>(
+        create: (context) => PostModifierBloc(repository: context.read<PostRepository>()),
+        child: CreatePostScreen(
+          postRepository: context.read<PostRepository>(),
+          post: widget.post,
+        ),
       ),
     );
 

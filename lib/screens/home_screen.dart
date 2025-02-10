@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:projet_esgix/blocs/auth/auth_event.dart';
+import 'package:projet_esgix/blocs/comment_list/comment_list_bloc.dart';
+import 'package:projet_esgix/blocs/comment_modifier/comment_modifier_bloc.dart';
 import 'package:projet_esgix/blocs/post/post_bloc.dart';
 import 'package:projet_esgix/blocs/post_list/post_list_bloc.dart';
 import 'package:projet_esgix/exceptions/global/app_exception.dart';
 import 'package:projet_esgix/screens/post_detail_screen.dart';
+import 'package:projet_esgix/services/api_service.dat.dart';
 import 'package:projet_esgix/widgets/post_card.dart';
 import 'package:projet_esgix/blocs/auth/auth_bloc.dart';
 import 'package:projet_esgix/models/post_model.dart';
@@ -48,19 +51,6 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         _fetchAllPosts();
       });
-    }
-  }
-
-  void _navigateToPostDetailScreen(String postId) async {
-    final bool? postUpdated = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PostDetailScreen(postId: postId),
-      ),
-    );
-
-    if (postUpdated == true) {
-      _reloadPosts();
     }
   }
 
@@ -145,4 +135,27 @@ class _HomeScreenState extends State<HomeScreen> {
   void _fetchAllPosts() => context.read<PostListBloc>().add(GetAllPosts());
 
   void _reloadPosts() => _fetchAllPosts();
+
+  void _navigateToPostDetailScreen(String postId) async {
+    final bool? postUpdated = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RepositoryProvider<PostRepository>(
+          create: (context) => PostRepository(apiService: ApiService.instance!),
+          child: MultiBlocProvider(
+              providers: [
+                BlocProvider(create: (context) => CommentListBloc(repository: context.read<PostRepository>())),
+                BlocProvider(create: (context) => PostBloc(repository: context.read<PostRepository>())),
+                BlocProvider(create: (context) => CommentModifierBloc(repository: context.read<PostRepository>())),
+              ],
+              child: PostDetailScreen(postId: postId)
+          ),
+        ),
+      ),
+    );
+
+    if (postUpdated == true) {
+      _reloadPosts();
+    }
+  }
 }
