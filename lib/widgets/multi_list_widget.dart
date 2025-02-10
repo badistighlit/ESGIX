@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:projet_esgix/blocs/post/post_bloc.dart';
 import 'package:projet_esgix/blocs/post_list/post_list_bloc.dart';
 import 'package:projet_esgix/exceptions/global/app_exception.dart';
 import 'package:projet_esgix/models/post_model.dart';
+import 'package:projet_esgix/repositories/post_repository.dart';
+import 'package:projet_esgix/services/api_service.dat.dart';
 import 'package:projet_esgix/widgets/post_card.dart';
 
 class MultiListWidget extends StatefulWidget {
@@ -101,7 +104,15 @@ class _MultiListWidgetState extends State<MultiListWidget> {
     child: ListView.builder(
       itemCount: posts.length,
       itemBuilder: (context, index) {
-        return PostCard(post: posts[index]);
+        return RepositoryProvider<PostRepository>(
+          create: (context) => PostRepository(apiService: ApiService.instance!),
+          child: BlocProvider<PostBloc>(
+            create: (context) => PostBloc(repository: context.read<PostRepository>()),
+            child: PostCard(
+                post: posts[index],
+            ),
+          ),
+        );
       }
     ),
   );

@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:projet_esgix/blocs/post/post_bloc.dart';
 import 'package:projet_esgix/blocs/post_modifier/post_modifier_bloc.dart';
+import 'package:projet_esgix/blocs/user/user_bloc.dart';
+import 'package:projet_esgix/repositories/user_repository.dart';
 import 'package:projet_esgix/screens/create_or_edit_post_screen.dart';
 import 'package:projet_esgix/models/auth_user_model.dart';
 import 'package:projet_esgix/models/post_model.dart';
 import 'package:projet_esgix/repositories/post_repository.dart';
+import 'package:projet_esgix/screens/user_profile_screen.dart';
 import 'package:projet_esgix/services/api_service.dat.dart';
 
 class PostCard extends StatefulWidget {
@@ -53,14 +56,7 @@ class _PostCardState extends State<PostCard> {
                     children: [
                       Row(
                         children: [
-                          CircleAvatar(
-                            backgroundImage: widget.post.author!.avatar !=
-                                null && widget.post.author!.avatar!.isNotEmpty
-                                ? NetworkImage(widget.post.author!.avatar!)
-                                : const AssetImage(
-                                'lib/assets/default_avatar.png') as ImageProvider,
-                            radius: 20,
-                          ),
+                          _buildAvatarImage(),
                           const SizedBox(width: 10),
                           Text(
                             widget.post.author!.username,
@@ -245,4 +241,35 @@ class _PostCardState extends State<PostCard> {
       },
     );
   }
+
+  Widget _buildAvatarImage() {
+    return GestureDetector(
+      onTap: _navigateToUserPage,
+      child: CircleAvatar(
+        backgroundImage: widget.post.author!.avatar !=
+            null && widget.post.author!.avatar!.isNotEmpty
+            ? NetworkImage(widget.post.author!.avatar!)
+            : const AssetImage(
+            'lib/assets/default_avatar.png') as ImageProvider,
+        radius: 20,
+      ),
+    );
+  }
+
+  void _navigateToUserPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RepositoryProvider(
+          create: (context) => UserRepository(ApiService.instance!),
+          child: BlocProvider<UserBloc>(
+            create: (context) => UserBloc(repository: context.read<UserRepository>()),
+            child: UserProfileScreen(
+              userId: widget.post.author!.id,
+            ),
+          ),
+        ),
+    ));
+  }
 }
+

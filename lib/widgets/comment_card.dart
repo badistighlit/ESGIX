@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:projet_esgix/blocs/comment_modifier/comment_modifier_bloc.dart';
+import 'package:projet_esgix/blocs/user/user_bloc.dart';
 import 'package:projet_esgix/models/comment_model.dart';
 import 'package:projet_esgix/models/auth_user_model.dart';
+import 'package:projet_esgix/repositories/user_repository.dart';
+import 'package:projet_esgix/screens/user_profile_screen.dart';
+import 'package:projet_esgix/services/api_service.dat.dart';
 
 class CommentCard extends StatefulWidget {
   final CommentModel comment;
@@ -31,12 +35,7 @@ class _CommentCardState extends State<CommentCard> {
               children: [
                 Row(
                   children: [
-                    CircleAvatar(
-                      backgroundImage: widget.comment.author!.avatar != null && widget.comment.author!.avatar!.isNotEmpty
-                          ? NetworkImage(widget.comment.author!.avatar!)
-                          : const AssetImage('lib/assets/default_avatar.png') as ImageProvider,
-                      radius: 20,
-                    ),
+                    _buildAvatarImage(),
                     const SizedBox(width: 8.0),
                     Text(
                       widget.comment.author!.username,
@@ -140,5 +139,33 @@ class _CommentCardState extends State<CommentCard> {
         );
       },
     );
+  }
+
+  Widget _buildAvatarImage() {
+    return GestureDetector(
+      onTap: _navigateToUserPage,
+      child: CircleAvatar(
+        backgroundImage: widget.comment.author!.avatar != null && widget.comment.author!.avatar!.isNotEmpty
+            ? NetworkImage(widget.comment.author!.avatar!)
+            : const AssetImage('lib/assets/default_avatar.png') as ImageProvider,
+        radius: 20,
+      ),
+    );
+  }
+
+  void _navigateToUserPage() {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => RepositoryProvider(
+            create: (context) => UserRepository(ApiService.instance!),
+            child: BlocProvider<UserBloc>(
+              create: (context) => UserBloc(repository: context.read<UserRepository>()),
+              child: UserProfileScreen(
+                userId: widget.comment.author!.id,
+              ),
+            ),
+          ),
+        ));
   }
 }
