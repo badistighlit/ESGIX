@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:projet_esgix/blocs/post/post_bloc.dart';
-import 'package:projet_esgix/blocs/post_list/post_list_bloc.dart';
 import 'package:projet_esgix/blocs/post_modifier/post_modifier_bloc.dart';
 import 'package:projet_esgix/screens/create_or_edit_post_screen.dart';
 import 'package:projet_esgix/models/auth_user_model.dart';
@@ -101,7 +100,8 @@ class _PostCardState extends State<PostCard> {
                               Icons.favorite,
                               color: _likedByUser ? Colors.red : Colors.grey,
                             ),
-                            onPressed: () => _toggleLike(context, widget.post.id!),
+                            onPressed: () =>
+                                _toggleLike(context, widget.post.id!),
                           ),
                           Text(widget.post.likesCount == 1 ? '${widget.post
                               .likesCount} like' : '${widget.post
@@ -123,7 +123,9 @@ class _PostCardState extends State<PostCard> {
   }
 
   void _toggleParams(BuildContext context, Offset offset, String idPost) {
-    final menuContext = Navigator.of(context).context;
+    final menuContext = Navigator
+        .of(context)
+        .context;
 
     final items = [
       PopupMenuItem(
@@ -151,7 +153,8 @@ class _PostCardState extends State<PostCard> {
     final createPostScreen = RepositoryProvider(
       create: (context) => PostRepository(apiService: ApiService.instance!),
       child: BlocProvider<PostModifierBloc>(
-        create: (context) => PostModifierBloc(repository: context.read<PostRepository>()),
+        create: (context) =>
+            PostModifierBloc(repository: context.read<PostRepository>()),
         child: CreatePostScreen(
           post: widget.post,
         ),
@@ -160,21 +163,23 @@ class _PostCardState extends State<PostCard> {
 
     showMenu(
       context: menuContext,
-      position: RelativeRect.fromLTRB(offset.dx, offset.dy, offset.dx + 1, offset.dy + 1),
+      position: RelativeRect.fromLTRB(
+          offset.dx, offset.dy, offset.dx + 1, offset.dy + 1),
       items: items,
     ).then((value) async {
       if (value == 'edit' && context.mounted) {
         final edited = await Navigator.push(
           menuContext,
           MaterialPageRoute(
-            builder: (context) => createPostScreen
+              builder: (context) => createPostScreen
           ),
         );
         if (edited == true && context.mounted) {
           context.read<PostBloc>().add(GetPost(idPost));
         }
       } else if (value == 'delete' && context.mounted) {
-        _showDeleteConfirmationDialog(context, idPost, context.read<PostBloc>());
+        _showDeleteConfirmationDialog(
+            context, idPost, context.read<PostBloc>());
       }
     });
   }
@@ -192,11 +197,13 @@ class _PostCardState extends State<PostCard> {
         }
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')));
     }
   }
 
-  void _showDeleteConfirmationDialog(BuildContext context, String idPost, bloc) {
+  void _showDeleteConfirmationDialog(BuildContext context, String idPost,
+      bloc) {
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
@@ -220,13 +227,15 @@ class _PostCardState extends State<PostCard> {
                   Navigator.of(dialogContext).pop();
                 } else if (state.status == PostStatus.error) {
                   ScaffoldMessenger.of(dialogContext).showSnackBar(
-                      SnackBar(content: Text('Erreur lors de la suppression: ${state.exception.toString()}'))
+                      SnackBar(content: Text(
+                          'Erreur lors de la suppression: ${state.exception
+                              .toString()}'))
                   );
                 }
               },
               child: TextButton(
                 onPressed: () {
-                    context.read<PostBloc>().add(DeletePost(widget.post.id!));
+                  context.read<PostBloc>().add(DeletePost(widget.post.id!));
                 },
                 child: Text('Oui'),
               ),
