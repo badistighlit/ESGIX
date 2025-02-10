@@ -67,13 +67,6 @@ class CommentModel {
       'likesCount': likesCount,
     };
   }
-
-
-
-
-
-
-
 }
 
 
