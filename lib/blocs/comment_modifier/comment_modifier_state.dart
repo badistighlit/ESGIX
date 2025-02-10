@@ -3,8 +3,11 @@ part of 'comment_modifier_bloc.dart';
 enum CommentModifierStatus {
   initial,
   addingComment,
+  deletingComment,
   successAddingComment,
+  successDeletingComment,
   errorAddingComment,
+  errorDeletingComment,
 }
 
 class CommentModifierState {

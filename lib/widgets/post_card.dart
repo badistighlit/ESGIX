@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:projet_esgix/blocs/post/post_bloc.dart';
@@ -177,7 +175,7 @@ class _PostCardState extends State<PostCard> {
           context.read<PostBloc>().add(GetPost(idPost));
         }
       } else if (value == 'delete' && context.mounted) {
-        _showDeleteConfirmationDialog(context, idPost);
+        _showDeleteConfirmationDialog(context, idPost, context.read<PostBloc>());
       }
     });
   }
@@ -199,7 +197,7 @@ class _PostCardState extends State<PostCard> {
     }
   }
 
-  void _showDeleteConfirmationDialog(BuildContext context, String idPost) {
+  void _showDeleteConfirmationDialog(BuildContext context, String idPost, bloc) {
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
@@ -213,24 +211,29 @@ class _PostCardState extends State<PostCard> {
               },
               child: Text('Non'),
             ),
-            TextButton(
-              onPressed: () async {
-                try {
-                  context.read<PostBloc>().add(DeletePost(idPost));
-
+            BlocListener<PostBloc, PostState>(
+              bloc: bloc,
+              listener: (context, state) {
+                if (state.status == PostStatus.deleted) {
+                  ScaffoldMessenger.of(dialogContext).showSnackBar(
+                      SnackBar(content: Text('Post supprimé'))
+                  );
                   Navigator.of(dialogContext).pop();
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     context.read<PostListBloc>().add(GetAllPosts());
                   });
-
-                } catch (e) {
-                  log("$e");
+                } else if (state.status == PostStatus.error) {
                   ScaffoldMessenger.of(dialogContext).showSnackBar(
-                      SnackBar(content: Text('Erreur lors de la suppression: $e'))
+                      SnackBar(content: Text('Erreur lors de la suppression: ${state.exception.toString()}'))
                   );
                 }
               },
-              child: Text('Oui'),
+              child: TextButton(
+                onPressed: () {
+                    context.read<PostBloc>().add(DeletePost(widget.post.id!));
+                },
+                child: Text('Oui'),
+              ),
             ),
           ],
         );

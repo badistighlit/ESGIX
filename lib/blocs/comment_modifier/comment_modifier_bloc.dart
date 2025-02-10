@@ -12,6 +12,7 @@ class CommentModifierBloc extends Bloc<CommentModifierEvent, CommentModifierStat
 
   CommentModifierBloc({required this.repository}): super(const CommentModifierState()) {
     on<CreateComment>(_onCreateComment);
+    on<DeleteComment>(_onDeleteComment);
   }
 
   void _onCreateComment(CreateComment event, Emitter<CommentModifierState> emit) async {
@@ -23,7 +24,20 @@ class CommentModifierBloc extends Bloc<CommentModifierEvent, CommentModifierStat
         emit(CommentModifierState(status: CommentModifierStatus.successAddingComment));
       }
     } catch (e) {
-      emit(CommentModifierState(status: CommentModifierStatus.errorAddingComment));
+      emit(CommentModifierState(status: CommentModifierStatus.errorAddingComment, exception: AppException.from(e)));
+    }
+  }
+
+  void _onDeleteComment(DeleteComment event, Emitter<CommentModifierState> emit) async {
+    emit(CommentModifierState(status: CommentModifierStatus.deletingComment));
+    try {
+      final success = await repository.deletePostById(event.comment.id);
+
+      if (success) {
+        emit(CommentModifierState(status: CommentModifierStatus.successDeletingComment));
+      }
+    } catch (e) {
+      emit(CommentModifierState(status: CommentModifierStatus.errorDeletingComment, exception: AppException.from(e)));
     }
   }
 }

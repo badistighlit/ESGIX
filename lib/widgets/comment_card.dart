@@ -1,19 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:projet_esgix/screens/create_or_edit_post_screen.dart';
-import '../models/comment_model.dart';
-import '../models/auth_user_model.dart';
-import '../repositories/post_repository.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:projet_esgix/blocs/comment_modifier/comment_modifier_bloc.dart';
+import 'package:projet_esgix/models/comment_model.dart';
+import 'package:projet_esgix/models/auth_user_model.dart';
 
 class CommentCard extends StatefulWidget {
   final CommentModel comment;
-  final PostRepository postRepository;
-  final Function? onCommentDeleted;
 
   const CommentCard({
     super.key,
     required this.comment,
-    required this.postRepository,
-    this.onCommentDeleted,
   });
 
   @override
@@ -21,89 +17,6 @@ class CommentCard extends StatefulWidget {
 }
 
 class _CommentCardState extends State<CommentCard> {
-  void _toggleParams(BuildContext context, Offset offset, String idComment) {
-    showMenu(
-      context: context,
-      position: RelativeRect.fromLTRB(offset.dx, offset.dy, offset.dx + 1, offset.dy + 1),
-      items: [
-        PopupMenuItem(
-          value: 'edit',
-          child: Row(
-            children: const [
-              Icon(Icons.edit, color: Colors.blue),
-              SizedBox(width: 8),
-              Text('Edit'),
-            ],
-          ),
-        ),
-        PopupMenuItem(
-          value: 'delete',
-          child: Row(
-            children: const [
-              Icon(Icons.delete, color: Colors.red),
-              SizedBox(width: 8),
-              Text('Delete'),
-            ],
-          ),
-        ),
-      ],
-    ).then((value) async {
-      if (value == 'edit') {
-        final edited = await Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => CreatePostScreen(
-              postRepository: widget.postRepository,
-              idPost: idComment,
-            ),
-          ),
-        );
-        if (edited == true && widget.onCommentDeleted != null) {
-          widget.onCommentDeleted!();
-        }
-      } else if (value == 'delete') {
-        _showDeleteConfirmationDialog(context, idComment);
-      }
-    });
-  }
-
-  void _showDeleteConfirmationDialog(BuildContext context, String idComment) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Confirmation'),
-          content: const Text('Voulez-vous vraiment supprimer ce commentaire ?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Non'),
-            ),
-            TextButton(
-              onPressed: () async {
-                try {
-                  await widget.postRepository.deletePostById(idComment);
-                  Navigator.of(context).pop();
-
-                  if (widget.onCommentDeleted != null) {
-                    widget.onCommentDeleted!();
-                  }
-                } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Erreur lors de la suppression: $e'))
-                  );
-                }
-              },
-              child: const Text('Oui'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -134,7 +47,7 @@ class _CommentCardState extends State<CommentCard> {
                 if (widget.comment.author!.id == AuthUser.id)
                   GestureDetector(
                     onTapDown: (TapDownDetails details) {
-                      _toggleParams(context, details.globalPosition, widget.comment.id);
+                      _toggleParams(context, details.globalPosition);
                     },
                     child: const Icon(Icons.settings),
                   ),
@@ -162,6 +75,70 @@ class _CommentCardState extends State<CommentCard> {
           ],
         ),
       ),
+    );
+  }
+
+  void _toggleParams(BuildContext context, Offset offset) {
+    showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(offset.dx, offset.dy, offset.dx + 1, offset.dy + 1),
+      items: [
+        PopupMenuItem(
+          value: 'delete',
+          child: Row(
+            children: const [
+              Icon(Icons.delete, color: Colors.red),
+              SizedBox(width: 8),
+              Text('Delete'),
+            ],
+          ),
+        ),
+      ],
+    ).then((value) {
+      if (value == 'delete' && context.mounted) {
+        _showDeleteConfirmationDialog(context, context.read<CommentModifierBloc>());
+      }
+    });
+  }
+
+  void _showDeleteConfirmationDialog(BuildContext context, CommentModifierBloc bloc) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('Confirmation'),
+          content: const Text('Voulez-vous vraiment supprimer ce commentaire ?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+              child: const Text('Non'),
+            ),
+            BlocListener<CommentModifierBloc, CommentModifierState>(
+              bloc: bloc,
+              listener: (context, state) {
+                if (state.status == CommentModifierStatus.successDeletingComment) {
+                  Navigator.of(dialogContext).pop();
+                  ScaffoldMessenger.of(dialogContext).showSnackBar(
+                  SnackBar(content: Text('Commentaire supprimé'))
+                  );
+                } else if (state.status == CommentModifierStatus.errorDeletingComment) {
+                  ScaffoldMessenger.of(dialogContext).showSnackBar(
+                      SnackBar(content: Text('Erreur lors de la suppression: ${state.exception.toString()}'))
+                  );
+                }
+              },
+              child: TextButton(
+                onPressed: () {
+                  bloc.add(DeleteComment(widget.comment));
+                },
+                child: const Text('Oui'),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

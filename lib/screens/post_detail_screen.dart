@@ -152,10 +152,14 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     itemCount: comments.length,
     itemBuilder: (context, index) {
       final comment = comments[index];
-      return CommentCard(
-        comment: comment,
-        postRepository: PostRepository(apiService: ApiService.instance!),
-        onCommentDeleted: _loadAllComments,
+      return RepositoryProvider(
+        create: (context) => PostRepository(apiService: ApiService.instance!),
+        child: BlocProvider<CommentModifierBloc>(
+          create: (context) => CommentModifierBloc(repository: context.read<PostRepository>()),
+          child: CommentCard(
+            comment: comment,
+          ),
+        ),
       );
     },
   );

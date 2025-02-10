@@ -9,3 +9,7 @@ sealed class CommentModifierEvent {
 class CreateComment extends CommentModifierEvent {
   CreateComment(super.comment);
 }
+
+class DeleteComment extends CommentModifierEvent {
+  DeleteComment(super.comment);
+}
