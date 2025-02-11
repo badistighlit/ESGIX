@@ -74,6 +74,27 @@ class ApiService {
       throw Exception('Get user error: ${e.toString()}');
     }
   }
+
+  // update user profil
+  Future<bool> updateUser(String idUser, String? userName, String? description, String? avatar) async {
+    try {
+      final response = await _httpClient.put(
+        '/users/$idUser',
+        options: Options(headers: _getHeaders()),
+        data: {
+          if (userName != null) "username": userName,
+          if (description != null) "description": description,
+          if (avatar != null) "avatar": avatar,
+        },
+      );
+
+      return response.statusCode == 200 || response.statusCode == 201;
+    } catch (e) {
+      throw Exception("Editing user error: ${e.toString()}");
+    }
+  }
+
+
 //posts
   //get posts
   Future<List<Map<String, dynamic>>> fetchPosts({int page = 0, int offset = 100}) async {
@@ -168,6 +189,30 @@ class ApiService {
       throw Exception("Creating post error: ${e.toString()}");
     }
   }
+
+  //get users liked a post
+
+  Future<List<Map<String, dynamic>>> getLikedUsers(String idPost) async {
+    try {
+      final response = await _httpClient.get(
+        '/likes/$idPost/users',
+        options: Options(headers: _getHeaders()),
+      );
+
+      if (response.statusCode == 200) {
+        if (response.data is List) {
+          return List<Map<String, dynamic>>.from(response.data);
+        } else {
+          throw Exception("Invalid response");
+        }
+      } else {
+        throw Exception('Failed to load liked users: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception("Error getting liked users: ${e.toString()}");
+    }
+  }
+
 
   //comments
   Future<List<Map<String, dynamic>>> fetchComments(String idParent) async {

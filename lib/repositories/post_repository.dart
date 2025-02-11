@@ -2,7 +2,7 @@ import 'dart:developer';
 
 import 'package:projet_esgix/models/comment_model.dart';
 
-import '../models/post_model.dart';
+import '../models/post_model.dart' hide Author;
 import '../services/api_service.dat.dart';
 
 class PostRepository {
@@ -101,4 +101,20 @@ Future <bool> likePost(String idPost) async {
       throw Exception('Failed to delete post by ID: $e');
     }
   }
+
+  Future<List<Author>> getPostLikes(String idPost) async {
+    try {
+      List<Map<String, dynamic>> users = await apiService.getLikedUsers(idPost);
+
+      return users.map((json) => Author.fromJson(json)).toList();
+    } catch (e) {
+      log(e.toString());
+      throw Exception('Failed to fetch post likes: $e');
+    }
+  }
+
+
+
 }
+
+

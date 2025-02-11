@@ -11,6 +11,9 @@ import 'package:projet_esgix/repositories/post_repository.dart';
 import 'package:projet_esgix/screens/user_profile_screen.dart';
 import 'package:projet_esgix/services/api_service.dat.dart';
 
+import '../blocs/user_list/user_list_bloc.dart';
+import '../screens/liked_users_screen.dart';
+
 class PostCard extends StatefulWidget {
   final Post post;
   final Function? postDetailsNavigator;
@@ -96,14 +99,29 @@ class _PostCardState extends State<PostCard> {
                               Icons.favorite,
                               color: _likedByUser ? Colors.red : Colors.grey,
                             ),
-                            onPressed: () =>
-                                _toggleLike(context, widget.post.id!),
+                            onPressed: () => _toggleLike(context, widget.post.id!),
                           ),
-                          Text(widget.post.likesCount == 1 ? '${widget.post
-                              .likesCount} like' : '${widget.post
-                              .likesCount} likes'),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => BlocProvider(
+                                    create: (context) => UserListBloc(repository: context.read<PostRepository>())
+                                      ..add(GetPostLikes(idPost: widget.post.id!)),
+                                    child: LikedUserScreen(postId: widget.post.id!),
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Text(
+                              widget.post.likesCount == 1 ? '${widget.post.likesCount} like' : '${widget.post.likesCount} likes',
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
                         ],
                       ),
+
                       Text(widget.post.commentsCount == 1 ? '${widget.post
                           .commentsCount} comment ' : '${widget.post
                           .commentsCount} comments'),
@@ -246,15 +264,18 @@ class _PostCardState extends State<PostCard> {
     return GestureDetector(
       onTap: _navigateToUserPage,
       child: CircleAvatar(
-        backgroundImage: widget.post.author!.avatar !=
-            null && widget.post.author!.avatar!.isNotEmpty
-            ? NetworkImage(widget.post.author!.avatar!)
-            : const AssetImage(
-            'lib/assets/default_avatar.png') as ImageProvider,
         radius: 20,
+        backgroundImage: widget.post.author?.avatar != null && widget.post.author!.avatar!.isNotEmpty
+            ? NetworkImage(widget.post.author!.avatar!)
+            : const AssetImage('lib/assets/default_avatar.png') as ImageProvider,
+        onBackgroundImageError: (_, __) => debugPrint("Erreur de chargement de l'image"),
+        child: (widget.post.author?.avatar == null || widget.post.author!.avatar!.isEmpty)
+            ? const Icon(Icons.person) // Icône par défaut si pas d'avatar
+            : null,
       ),
     );
   }
+
 
   void _navigateToUserPage() {
     Navigator.push(

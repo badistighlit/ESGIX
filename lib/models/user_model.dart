@@ -22,4 +22,17 @@ class User {
       description: data['description'],
     );
   }
+  User copyWith({
+    String? id,
+    String? username,
+    String? description,
+    String? avatar,
+  }) {
+    return User(
+      id: id ?? this.id,
+      username: username ?? this.username,
+      description: description ?? this.description,
+      avatar: avatar ?? this.avatar,
+    );
+  }
 }
